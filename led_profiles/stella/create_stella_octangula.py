@@ -2,7 +2,7 @@
 
 Scope: creates only ``StellaOctangula.FCStd``. It opens and links the existing
 ``StellaCore.FCStd`` and ``StellaArm.FCStd`` files; it never edits either source.
-Run inside FreeCAD after the arm carries its CableClearanceEnvelope witness.
+Run inside FreeCAD after the arm and core source documents are saved.
 """
 
 from __future__ import annotations
@@ -22,13 +22,10 @@ PROFILE_LENGTH = 1500.0
 PROFILE_WIDTH = 26.1
 PROFILE_HEIGHT = 30.5
 PROFILE_RIM_Z = 16.8
-PROFILE_RADIUS = PROFILE_WIDTH / 2
+PROFILE_SOURCE_DIR = os.path.join(HERE, "stella_profile_sources")
+CABLE_DIAMETER = 6.7
 ARM_SADDLE_START = 72.0
 SADDLE_AXIS_Z = 19.25
-CABLE_DIAMETER = 6.7
-CABLE_ENVELOPE_DIAMETER = 7.7
-CABLE_BEND_RADIUS = 26.8  # LAPP ÖLFLEX CLASSIC 110, 4 × measured 6.7 mm OD.
-CABLE_SERVICE_RADIUS = 45.0
 CROSSING_OFFSET = PROFILE_HEIGHT + 0.25
 BASE_SIGNS = ((1, 1, 1), (1, -1, -1), (-1, 1, -1), (-1, -1, 1))
 OFFSET_SIGNS = tuple((-x, y, z) for x, y, z in BASE_SIGNS)
@@ -257,6 +254,35 @@ def _require_source_object(
         raise RuntimeError(f"{document.Name}.{name} has no valid shape")
     return source
 
+def _import_step_source(
+    document: App.Document,
+    name: str,
+    label: str,
+    filename: str,
+    parent: App.DocumentObject,
+    colour: tuple[float, float, float],
+    transparency: int = 0,
+) -> App.DocumentObject:
+    path = os.path.join(PROFILE_SOURCE_DIR, filename)
+    if not os.path.isfile(path):
+        raise FileNotFoundError(
+            f"missing generated source {path}; run export_stella_profile_sources.py first"
+        )
+    shape = Part.read(path)
+    if shape.isNull() or not shape.isValid():
+        raise RuntimeError(f"invalid STEP source: {path}")
+    source = document.addObject("Part::Feature", name)
+    source.Label = label
+    source.Shape = shape
+    source.addProperty("App::PropertyString", "SourcePath", "Reference")
+    source.SourcePath = path
+    source.addProperty("App::PropertyString", "Purpose", "Reference")
+    source.Purpose = "Exact reference geometry exported from ../build123d-models."
+    _set_view_property(source, "ShapeColor", colour)
+    _set_view_property(source, "Transparency", transparency)
+    parent.addObject(source)
+    return source
+
 
 def build() -> App.Document:
     documents = App.listDocuments()
@@ -273,9 +299,11 @@ def build() -> App.Document:
     arm_doc = _open_source_document(documents, "StellaArm", ARM_PATH)
     core_source = _require_source_object(core_doc, "CoreBody", "PartDesign::Body")
     arm_source = _require_source_object(arm_doc, "ArmBody", "PartDesign::Body")
-    cable_source = _require_source_object(arm_doc, "CableClearanceEnvelope", "Part::Feature")
-    if not all((core_source, arm_source, cable_source)):
-        raise RuntimeError("Stella source bodies or cable-clearance witness are unavailable")
+    connector_source = _require_source_object(arm_doc, "ConnectorBody", "PartDesign::Body")
+    if not arm_source.ViewObject.Visibility or not connector_source.ViewObject.Visibility:
+        raise RuntimeError("ConnectorBody and ArmBody must both be visible in StellaArm")
+    # ConnectorBody is already fused into ArmBody. Link the final arm only;
+    # its saved per-face colors distinguish the connector without duplicate solids.
 
     initial_side = PROFILE_LENGTH + 2 * ARM_SADDLE_START
     initial_layout = _layout(initial_side, initial_side)
@@ -312,8 +340,6 @@ def build() -> App.Document:
             ("ProfileRimHeight", PROFILE_RIM_Z),
             ("ArmSaddleStart", ARM_SADDLE_START),
             ("CableDiameter", CABLE_DIAMETER),
-            ("CableEnvelopeDiameter", CABLE_ENVELOPE_DIAMETER),
-            ("CableBendRadius", CABLE_BEND_RADIUS),
             ("CrossingOffset", CROSSING_OFFSET),
             ("BaseTetrahedronSide", base_side),
             ("OffsetTetrahedronSide", offset_side),
@@ -324,92 +350,103 @@ def build() -> App.Document:
         params.CoreSeatDirection = "Inward toward the tetrahedron centre"
         params.addProperty("App::PropertyString", "LayoutIntent", "Layout dimensions")
         params.LayoutIntent = (
-            "Twelve 1.5 m LED profile envelopes on two interpenetrating tetrahedra. "
-            "Core seats face inward so the existing keyed arms follow each closed-frame edge; "
-            "arm-side cable envelopes remain open and reference-only."
+            "Twelve complete 1.5 m LED profile assemblies on two interpenetrating "
+            "tetrahedra, using exact build123d extrusion, diffuser, endcaps, glands, "
+            "and cable stubs. Core seats face inward along each closed-frame edge."
         )
 
         sources = document.addObject("App::Part", "ReferenceSources")
-        sources.Label = "Reference-only source geometry"
-        profile_outer = document.addObject("Part::Feature", "ProfileEnvelopeSource")
-        profile_outer.Label = "Measured LED profile outer envelope — 26.1 × 30.5 × 1500 mm"
-        lower = Part.makeCylinder(
-            PROFILE_RADIUS,
-            PROFILE_LENGTH,
-            App.Vector(0, 0, PROFILE_RADIUS),
-            App.Vector(1, 0, 0),
+        sources.Label = "Reference-only build123d source geometry"
+        profile_source = _import_step_source(
+            document,
+            "ProfileExtrusionSource",
+            "Exact aluminium LED profile — 26.1 × 30.5 × 1500 mm",
+            "profile_extrusion.step",
+            sources,
+            (0.42, 0.45, 0.49),
         )
-        upper = Part.makeCylinder(
-            PROFILE_RADIUS,
-            PROFILE_LENGTH,
-            App.Vector(0, 0, PROFILE_HEIGHT - PROFILE_RADIUS),
-            App.Vector(1, 0, 0),
+        diffuser_source = _import_step_source(
+            document,
+            "ProfileDiffuserSource",
+            "Exact snap-in diffuser",
+            "profile_diffuser.step",
+            sources,
+            (0.95, 0.95, 0.80),
+            35,
         )
-        middle = Part.makeBox(
-            PROFILE_LENGTH,
-            PROFILE_WIDTH,
-            PROFILE_HEIGHT - PROFILE_WIDTH,
-            App.Vector(0, -PROFILE_RADIUS, PROFILE_RADIUS),
+        endcap_near_source = _import_step_source(
+            document,
+            "EndcapNearSource",
+            "Exact near endcap",
+            "endcap_near.step",
+            sources,
+            (0.20, 0.22, 0.25),
         )
-        outer_shape = lower.fuse(upper).fuse(middle)
-        diffuser_cut = Part.makeBox(
-            PROFILE_LENGTH,
-            PROFILE_WIDTH + 0.02,
-            PROFILE_HEIGHT - PROFILE_RIM_Z,
-            App.Vector(0, -PROFILE_RADIUS - 0.01, PROFILE_RIM_Z),
+        endcap_far_source = _import_step_source(
+            document,
+            "EndcapFarSource",
+            "Exact far endcap",
+            "endcap_far.step",
+            sources,
+            (0.20, 0.22, 0.25),
         )
-        diffuser_shape = outer_shape.common(diffuser_cut)
-        profile_outer.Shape = outer_shape.cut(diffuser_shape)
-        profile_outer.addProperty("App::PropertyString", "Purpose", "Reference")
-        profile_outer.Purpose = "Reference-only measured aluminium profile envelope; not a manufactured extrusion model."
-        _set_view_property(profile_outer, "ShapeColor", (0.42, 0.45, 0.49))
-        diffuser = document.addObject("Part::Feature", "DiffuserEnvelopeSource")
-        diffuser.Label = "Reference-only diffuser envelope"
-        diffuser.Shape = diffuser_shape
-        diffuser.addProperty("App::PropertyString", "Purpose", "Reference")
-        diffuser.Purpose = "Reference-only diffuser envelope; retained to show the illuminated surface direction."
-        _set_view_property(diffuser, "ShapeColor", (0.95, 0.95, 0.80))
-        _set_view_property(diffuser, "Transparency", 35)
-        cable_bend = document.addObject("Part::Feature", "CableBendEnvelopeSource")
-        cable_bend.Label = "Reference-only flexible cable bend — R26.8 mm, Ø7.7 mm envelope"
-        cable_bend.Shape = Part.makeTorus(
-            CABLE_BEND_RADIUS,
-            CABLE_ENVELOPE_DIAMETER / 2,
-            App.Vector(CABLE_SERVICE_RADIUS + CABLE_BEND_RADIUS, 0.0, 20.0),
-            App.Vector(0.0, 1.0, 0.0),
-            0.0,
-            90.0,
-            90.0,
+        gland_near_source = _import_step_source(
+            document,
+            "GlandNearSource",
+            "Exact near cable gland",
+            "gland_near.step",
+            sources,
+            (0.08, 0.08, 0.09),
         )
-        cable_bend.addProperty("App::PropertyLength", "MinimumBendRadius", "Cable service")
-        cable_bend.MinimumBendRadius = CABLE_BEND_RADIUS
-        cable_bend.addProperty("App::PropertyString", "Purpose", "Cable service")
-        cable_bend.Purpose = "Reference-only 90° cable bend envelope outside the core; no sharp turn or closed threading path."
-        _set_view_property(cable_bend, "ShapeColor", (1.0, 0.55, 0.0))
-        _set_view_property(cable_bend, "Transparency", 55)
-        sources.addObject(profile_outer)
-        sources.addObject(diffuser)
-        sources.addObject(cable_bend)
+        cable_near_source = _import_step_source(
+            document,
+            "CableNearSource",
+            "Actual near cable stub — Ø6.7 mm",
+            "cable_near.step",
+            sources,
+            (0.04, 0.04, 0.05),
+        )
+        gland_far_source = _import_step_source(
+            document,
+            "GlandFarSource",
+            "Exact far cable gland",
+            "gland_far.step",
+            sources,
+            (0.08, 0.08, 0.09),
+        )
+        cable_far_source = _import_step_source(
+            document,
+            "CableFarSource",
+            "Actual far cable stub — Ø6.7 mm",
+            "cable_far.step",
+            sources,
+            (0.04, 0.04, 0.05),
+        )
         _set_view_property(sources, "Visibility", False)
 
         assembly = document.addObject("App::Part", "StellaOctangula")
-        assembly.Label = "Stella octangula — 12 LED profiles, 8 cores, 24 cable-clearance arms"
+        assembly.Label = "Stella octangula — 12 complete LED profiles, 8 cores, 24 arms"
         cores_group = document.addObject("App::Part", "VertexCores")
         cores_group.Label = "Vertex cores — 8 linked instances"
         arms_group = document.addObject("App::Part", "ProfileArms")
         arms_group.Label = "Profile arms — 24 linked instances"
         lamps_group = document.addObject("App::Part", "LEDProfileAssemblies")
-        lamps_group.Label = "LED profile assemblies — 12 linked pairs"
-        cable_group = document.addObject("App::Part", "CableClearanceRoutes")
-        cable_group.Label = "Cable service envelopes — 24 open arm routes plus 24 R26.8 bends"
-        for group in (cores_group, arms_group, lamps_group, cable_group):
+        lamps_group.Label = "Complete LED profile assemblies — 12 lamps"
+        for group in (cores_group, arms_group, lamps_group):
             assembly.addObject(group)
+
 
         core_links: dict[tuple[str, int], App.DocumentObject] = {}
         arm_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
-        profile_pairs: list[tuple[App.DocumentObject, App.DocumentObject, App.DocumentObject]] = []
+        profile_pairs: list[
+            tuple[
+                App.DocumentObject,
+                App.DocumentObject,
+                App.DocumentObject,
+                App.DocumentObject,
+            ]
+        ] = []
         cable_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
-        bend_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
         core_counter = arm_counter = lamp_counter = 0
         for tetra_name, edge_index, cores, direction, arms in layout_data:
             if edge_index == 0:
@@ -425,21 +462,6 @@ def build() -> App.Document:
                         (0.17, 0.20, 0.24),
                     )
                     core_counter += 1
-                    for angle in (30.0, 150.0, 270.0):
-                        bend_placement = core_placement.multiply(
-                            App.Placement(App.Vector(), App.Vector(0, 0, 1), angle)
-                        )
-                        bend_link = _add_link(
-                            document,
-                            f"CableBend_{tetra_name}_{index}_{int(angle)}",
-                            f"Flexible cable bend — {tetra_name} core {index}, R26.8 mm",
-                            cable_bend,
-                            bend_placement,
-                            cable_group,
-                            (1.0, 0.55, 0.0),
-                            55,
-                        )
-                        bend_links.append((bend_link, core_links[(tetra_name, index)]))
 
             arm_by_endpoint = {}
             for endpoint_name, endpoint, theta, arm_placement, seat_start in arms:
@@ -452,19 +474,8 @@ def build() -> App.Document:
                     arms_group,
                     (0.24, 0.27, 0.31),
                 )
-                cable_link = _add_link(
-                    document,
-                    f"CableRoute_{tetra_name}_{edge_index}_{endpoint_name}",
-                    f"Open cable envelope — {tetra_name} edge {edge_index} {endpoint_name}",
-                    cable_source,
-                    arm_placement,
-                    cable_group,
-                    (1.0, 0.55, 0.0),
-                    55,
-                )
-                arm_links.append((arm_link, core_links[(tetra_name, endpoint)]))
-                cable_links.append((cable_link, arm_link))
                 arm_by_endpoint[endpoint_name] = (arm_placement, seat_start, arm_link)
+                arm_links.append((arm_link, core_links[(tetra_name, endpoint)]))
                 arm_counter += 1
 
             near_placement, _, near_arm = arm_by_endpoint["near"]
@@ -475,26 +486,43 @@ def build() -> App.Document:
             lamp = document.addObject("App::Part", f"Lamp_{tetra_name}_{edge_index}")
             lamp.Label = f"LED profile assembly — {tetra_name} lamp {edge_index}"
             lamps_group.addObject(lamp)
-            aluminium_link = _add_link(
-                document,
-                f"Lamp_{tetra_name}_{edge_index}_Aluminium",
-                f"Aluminium profile — {tetra_name} lamp {edge_index}",
-                profile_outer,
-                profile_placement,
-                lamp,
-                (0.42, 0.45, 0.49),
+            lamp.ViewObject.Visibility = True
+            component_specs = (
+                ("Aluminium", "Aluminium profile", profile_source, (0.42, 0.45, 0.49), None),
+                ("Diffuser", "Diffuser", diffuser_source, (0.95, 0.95, 0.80), 35),
+                ("EndcapNear", "Near endcap", endcap_near_source, (0.20, 0.22, 0.25), None),
+                ("EndcapFar", "Far endcap", endcap_far_source, (0.20, 0.22, 0.25), None),
+                ("GlandNear", "Near cable gland", gland_near_source, (0.08, 0.08, 0.09), None),
+                ("CableNear", "Near cable stub", cable_near_source, (0.04, 0.04, 0.05), None),
+                ("GlandFar", "Far cable gland", gland_far_source, (0.08, 0.08, 0.09), None),
+                ("CableFar", "Far cable stub", cable_far_source, (0.04, 0.04, 0.05), None),
             )
-            _add_link(
-                document,
-                f"Lamp_{tetra_name}_{edge_index}_Diffuser",
-                f"Diffuser — {tetra_name} lamp {edge_index}",
-                diffuser,
-                profile_placement,
-                lamp,
-                (0.95, 0.95, 0.80),
-                35,
-            )
-            profile_pairs.append((aluminium_link, near_arm, far_arm))
+            links = []
+            for suffix, label, source, colour, transparency in component_specs:
+                links.append(
+                    _add_link(
+                        document,
+                        f"Lamp_{tetra_name}_{edge_index}_{suffix}",
+                        f"{label} — {tetra_name} lamp {edge_index}",
+                        source,
+                        profile_placement,
+                        lamp,
+                        colour,
+                        transparency,
+                    )
+                )
+            (
+                aluminium_link,
+                diffuser_link,
+                _endcap_near_link,
+                _endcap_far_link,
+                _gland_near_link,
+                cable_near_link,
+                _gland_far_link,
+                cable_far_link,
+            ) = links
+            cable_links.extend(((cable_near_link, near_arm), (cable_far_link, far_arm)))
+            profile_pairs.append((aluminium_link, diffuser_link, near_arm, far_arm))
             lamp_counter += 1
 
         document.recompute()
@@ -504,8 +532,7 @@ def build() -> App.Document:
                 *core_links.values(),
                 *(arm for arm, _ in arm_links),
                 *(cable for cable, _ in cable_links),
-                *(bend for bend, _ in bend_links),
-                *(profile[0] for profile in profile_pairs),
+                *(obj for pair in profile_pairs for obj in pair[:2]),
             )
             if not obj.Shape.isValid()
         ]
@@ -518,23 +545,28 @@ def build() -> App.Document:
             (cable.Shape.common(arm.Shape).Volume for cable, arm in cable_links),
             default=0.0,
         )
-        max_bend_core_overlap = max(
-            (bend.Shape.common(core.Shape).Volume for bend, core in bend_links), default=0.0
-        )
         max_profile_overlap = max(
-            max(aluminium.Shape.common(near.Shape).Volume, aluminium.Shape.common(far.Shape).Volume)
-            for aluminium, near, far in profile_pairs
+            max(
+                aluminium.Shape.common(near.Shape).Volume,
+                aluminium.Shape.common(far.Shape).Volume,
+                diffuser.Shape.common(near.Shape).Volume,
+                diffuser.Shape.common(far.Shape).Volume,
+            )
+            for aluminium, diffuser, near, far in profile_pairs
         )
         if max_joint_overlap > 0.01:
             raise RuntimeError(f"arm/core material overlap is too large: {max_joint_overlap:.6f} mm^3")
-        if max_cable_overlap > 1e-6:
-            raise RuntimeError(f"cable envelope intersects arm material: {max_cable_overlap:.6f} mm^3")
-        if max_bend_core_overlap > 1e-6:
-            raise RuntimeError(
-                f"minimum-radius cable bend intersects core material: {max_bend_core_overlap:.6f} mm^3"
-            )
         if max_profile_overlap > 0.01:
-            raise RuntimeError(f"profile envelope intersects its saddle: {max_profile_overlap:.6f} mm^3")
+            raise RuntimeError(f"profile or diffuser intersects its saddle: {max_profile_overlap:.6f} mm^3")
+        assembly.addProperty("App::PropertyVolume", "MaxCableArmOverlap", "Validation")
+        assembly.MaxCableArmOverlap = max_cable_overlap
+        assembly.addProperty("App::PropertyBool", "CableRouteClear", "Validation")
+        assembly.CableRouteClear = max_cable_overlap <= 1e-6
+        assembly.addProperty("App::PropertyString", "CableRouteNote", "Validation")
+        assembly.CableRouteNote = (
+            "Axial build123d cable stubs are shown deliberately; non-zero overlap "
+            "marks the arm-side clearance that still needs a cabling-hole decision."
+        )
         document.commitTransaction()
     except Exception:
         document.abortTransaction()
@@ -551,9 +583,9 @@ def build() -> App.Document:
             "profiles": lamp_counter,
             "cores": core_counter,
             "arms": arm_counter,
-            "cable_routes": len(cable_links),
-            "cable_bends": len(bend_links),
-            "cable_bend_radius": CABLE_BEND_RADIUS,
+            "cable_stubs": len(cable_links),
+            "endcaps_per_lamp": 2,
+            "glands_per_lamp": 2,
             "base_tetrahedron_side": round(base_side, 6),
             "offset_tetrahedron_side": round(offset_side, 6),
             "profile_span_error": span_error,
@@ -561,7 +593,6 @@ def build() -> App.Document:
             "max_arm_core_overlap": max_joint_overlap,
             "max_cable_arm_overlap": max_cable_overlap,
             "max_profile_saddle_overlap": max_profile_overlap,
-            "max_bend_core_overlap": max_bend_core_overlap,
         }
     )
     return document

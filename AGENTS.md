@@ -22,6 +22,8 @@
 - Drive native feature properties and named Sketcher constraints with FreeCAD expressions such as `StellaParams.CoreHeight`; preserve units and recompute to verify dependency updates.
 - Use named Sketcher constraints for sketch-local design intent. Use spreadsheets only for tabular calculations, ranges, reports, or FreeCAD 0.21 compatibility.
 - Keep editable sketches and dependent native operations in the document tree. Use a final `Part::Feature` only for explicitly imported or reference-only geometry.
+- Apply a repeated-feature budget: for identical additions or cuts, use one constrained multi-profile sketch and one native operation or pattern; retain a separate feature only for an independent design parameter, operation type, or validation measurement.
+  Keep required `Part::*` geometry that cannot live in a `PartDesign::Body` at document scope and feed it to one final Body BaseFeature; do not bridge that boundary with a PartDesign Boolean.
 - Use stable internal names and descriptive labels; query actual object names rather than inferring them from labels or screenshots.
 - Prefer origin planes, datum geometry, sketches, and named references over incidental `Face7` or `Edge12` identities.
 - Recompute before measuring, exporting, or making geometry claims.
@@ -31,7 +33,7 @@
 After a geometry change, verify the affected model before delivery:
 
 1. Recompute and check for invalid or error-state objects and failed features.
-2. Measure the requested dimensions and clearances; check expected native object types, expressions, and dependencies.
+2. Measure the requested dimensions and clearances; check expected native object types, expressions, dependencies, final Body tip, and the deliberate native feature counts/types. Reject duplicate printable solids; reference-only `Part::Feature` objects are permitted.
 3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm the expected geometry change without rerunning an external script. Restore the original value and recompute before saving.
 4. Save, close, reload, and repeat the relevant state and geometry checks. Preserve unsaved user work before closing or reloading.
 5. Inspect an isometric view and any orthographic or section views needed to prove the visible shape; confirm the intended objects, visibility, and body tip. Screenshots complement measurements; they do not replace them.
@@ -44,11 +46,11 @@ execution-mode selection, health checks, transactions, recovery, and persistence
 
 ### Failure-resistant scripting
 
-- Before a scripted rebuild, use `App.listDocuments()` and `.get(name)`; `App.getDocument(name)` raises for an unknown name.
+- Resolve a target by its internal `Name` from `App.listDocuments()`; `Label` is presentation-only and `FileName` is the expected saved path. Require an existing expected path and fail unless the normalized `doc.FileName` matches it after both the Name lookup and any open; preserve FreeCAD's returned `doc.Name` for every later lookup.
 - Save the owner document before assigning any cross-document `App::Link.LinkedObject`; verify every source document has a non-empty `FileName`.
 - Treat `App::Link` view providers as capability-limited: guard optional display properties such as `ShapeColor` and `Transparency` with `hasattr`.
 - Use `activeView().fitAll()` for scripted view fitting; `fitSelection()` is not available on every FreeCAD view provider.
-- After a GUI timeout or exception, query RPC health and inspect the document before retrying. Never replay a document mutation blindly.
+- After a GUI timeout or exception, follow the recovery sequence in `.agents/skills/freecad-mcp/SKILL.md` before retrying; it must establish whether a partial mutation occurred.
 - Optional `IfcOpenShell` warnings from the BIM workbench are environmental and do not validate or invalidate model geometry; do not retry a model operation because of them.
 
 ## References

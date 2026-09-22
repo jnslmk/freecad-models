@@ -4,3 +4,4 @@ __pycache__/
 .omp/
 /freecad-mcp/
 .implement-review/
+.codex-tmp/

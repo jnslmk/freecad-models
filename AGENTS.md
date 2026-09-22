@@ -42,6 +42,15 @@ Use the running FreeCAD MCP service as the default GUI bridge. Before any MCP
 document or view operation, read `.agents/skills/freecad-mcp/SKILL.md`; it owns
 execution-mode selection, health checks, transactions, recovery, and persistence.
 
+### Failure-resistant scripting
+
+- Before a scripted rebuild, use `App.listDocuments()` and `.get(name)`; `App.getDocument(name)` raises for an unknown name.
+- Save the owner document before assigning any cross-document `App::Link.LinkedObject`; verify every source document has a non-empty `FileName`.
+- Treat `App::Link` view providers as capability-limited: guard optional display properties such as `ShapeColor` and `Transparency` with `hasattr`.
+- Use `activeView().fitAll()` for scripted view fitting; `fitSelection()` is not available on every FreeCAD view provider.
+- After a GUI timeout or exception, query RPC health and inspect the document before retrying. Never replay a document mutation blindly.
+- Optional `IfcOpenShell` warnings from the BIM workbench are environmental and do not validate or invalidate model geometry; do not retry a model operation because of them.
+
 ## References
 
 - Consult `research/freecad-variables.md` when choosing parameter containers or migrating spreadsheet parameters.

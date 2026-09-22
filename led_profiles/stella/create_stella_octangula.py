@@ -192,6 +192,14 @@ def _layout(base_side: float, offset_side: float) -> list[tuple]:
     return layout
 
 
+def _set_view_property(
+    object_: App.DocumentObject, property_name: str, value: object
+) -> None:
+    view = getattr(object_, "ViewObject", None)
+    if view is not None and hasattr(view, property_name):
+        setattr(view, property_name, value)
+
+
 def _add_link(
     document: App.Document,
     name: str,
@@ -202,29 +210,70 @@ def _add_link(
     colour: tuple[float, float, float] | None = None,
     transparency: int | None = None,
 ) -> App.DocumentObject:
+    if not document.FileName:
+        raise RuntimeError("assembly document must be saved before creating cross-document links")
+    source_document = source.Document
+    if source_document is not document and not source_document.FileName:
+        raise RuntimeError(
+            f"linked source document is unsaved: {source_document.Name}; save it before linking"
+        )
+    if parent.Document is not document:
+        raise RuntimeError(f"link parent belongs to another document: {parent.Name}")
     link = document.addObject("App::Link", name)
     link.Label = label
     link.LinkedObject = source
     link.LinkTransform = True
     link.Placement = placement
-    if colour is not None and hasattr(link.ViewObject, "ShapeColor"):
-        link.ViewObject.ShapeColor = colour
-    if transparency is not None and hasattr(link.ViewObject, "Transparency"):
-        link.ViewObject.Transparency = transparency
+    if colour is not None:
+        _set_view_property(link, "ShapeColor", colour)
+    if transparency is not None:
+        _set_view_property(link, "Transparency", transparency)
     parent.addObject(link)
     return link
 
 
-def build() -> App.Document:
-    if os.path.exists(OUTPUT_PATH):
-        raise RuntimeError(f"refusing to replace existing assembly: {OUTPUT_PATH}")
+def _open_source_document(documents: dict, name: str, path: str) -> App.Document:
+    document = documents.get(name) or App.openDocument(path)
+    if not document.FileName:
+        raise RuntimeError(f"{name} is unsaved; save the authoritative source before assembling")
+    if os.path.realpath(document.FileName) != os.path.realpath(path):
+        raise RuntimeError(
+            f"{name} is open from an unexpected path: {document.FileName}; expected {path}"
+        )
+    return document
 
+
+def _require_source_object(
+    document: App.Document, name: str, expected_type: str
+) -> App.DocumentObject:
+    source = document.getObject(name)
+    if source is None:
+        raise RuntimeError(f"{document.Name} is missing required object {name}")
+    if source.TypeId != expected_type:
+        raise RuntimeError(
+            f"{document.Name}.{name} has type {source.TypeId}; expected {expected_type}"
+        )
+    if not hasattr(source, "Shape") or source.Shape.isNull() or not source.Shape.isValid():
+        raise RuntimeError(f"{document.Name}.{name} has no valid shape")
+    return source
+
+
+def build() -> App.Document:
     documents = App.listDocuments()
-    core_doc = documents.get("StellaCore") or App.openDocument(CORE_PATH)
-    arm_doc = documents.get("StellaArm") or App.openDocument(ARM_PATH)
-    core_source = core_doc.getObject("CoreBody")
-    arm_source = arm_doc.getObject("ArmBody")
-    cable_source = arm_doc.getObject("CableClearanceEnvelope")
+    if "StellaOctangula" in documents:
+        raise RuntimeError(
+            "StellaOctangula is already open; close it before rebuilding the saved assembly"
+        )
+    if os.path.exists(OUTPUT_PATH):
+        raise RuntimeError(
+            f"refusing to replace existing assembly: {OUTPUT_PATH}; remove it deliberately first"
+        )
+
+    core_doc = _open_source_document(documents, "StellaCore", CORE_PATH)
+    arm_doc = _open_source_document(documents, "StellaArm", ARM_PATH)
+    core_source = _require_source_object(core_doc, "CoreBody", "PartDesign::Body")
+    arm_source = _require_source_object(arm_doc, "ArmBody", "PartDesign::Body")
+    cable_source = _require_source_object(arm_doc, "CableClearanceEnvelope", "Part::Feature")
     if not all((core_source, arm_source, cable_source)):
         raise RuntimeError("Stella source bodies or cable-clearance witness are unavailable")
 
@@ -252,6 +301,8 @@ def build() -> App.Document:
     document.saveAs(OUTPUT_PATH)  # Cross-document App::Links require a saved owner.
     document.openTransaction("create redesigned Stella octangula layout")
     try:
+
+
         params = document.addObject("App::VarSet", "StellaAssemblyParams")
         params.Label = "Stella octangula layout dimensions"
         for name, value in (
@@ -311,14 +362,14 @@ def build() -> App.Document:
         profile_outer.Shape = outer_shape.cut(diffuser_shape)
         profile_outer.addProperty("App::PropertyString", "Purpose", "Reference")
         profile_outer.Purpose = "Reference-only measured aluminium profile envelope; not a manufactured extrusion model."
-        profile_outer.ViewObject.ShapeColor = (0.42, 0.45, 0.49)
+        _set_view_property(profile_outer, "ShapeColor", (0.42, 0.45, 0.49))
         diffuser = document.addObject("Part::Feature", "DiffuserEnvelopeSource")
         diffuser.Label = "Reference-only diffuser envelope"
         diffuser.Shape = diffuser_shape
         diffuser.addProperty("App::PropertyString", "Purpose", "Reference")
         diffuser.Purpose = "Reference-only diffuser envelope; retained to show the illuminated surface direction."
-        diffuser.ViewObject.ShapeColor = (0.95, 0.95, 0.80)
-        diffuser.ViewObject.Transparency = 35
+        _set_view_property(diffuser, "ShapeColor", (0.95, 0.95, 0.80))
+        _set_view_property(diffuser, "Transparency", 35)
         cable_bend = document.addObject("Part::Feature", "CableBendEnvelopeSource")
         cable_bend.Label = "Reference-only flexible cable bend — R26.8 mm, Ø7.7 mm envelope"
         cable_bend.Shape = Part.makeTorus(
@@ -334,12 +385,12 @@ def build() -> App.Document:
         cable_bend.MinimumBendRadius = CABLE_BEND_RADIUS
         cable_bend.addProperty("App::PropertyString", "Purpose", "Cable service")
         cable_bend.Purpose = "Reference-only 90° cable bend envelope outside the core; no sharp turn or closed threading path."
-        cable_bend.ViewObject.ShapeColor = (1.0, 0.55, 0.0)
-        cable_bend.ViewObject.Transparency = 55
+        _set_view_property(cable_bend, "ShapeColor", (1.0, 0.55, 0.0))
+        _set_view_property(cable_bend, "Transparency", 55)
         sources.addObject(profile_outer)
         sources.addObject(diffuser)
         sources.addObject(cable_bend)
-        sources.ViewObject.Visibility = False
+        _set_view_property(sources, "Visibility", False)
 
         assembly = document.addObject("App::Part", "StellaOctangula")
         assembly.Label = "Stella octangula — 12 LED profiles, 8 cores, 24 cable-clearance arms"

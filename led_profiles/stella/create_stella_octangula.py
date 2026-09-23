@@ -2,8 +2,8 @@
 
 Scope: creates one new assembly file. The default is ``StellaOctangula.FCStd``;
 ``STELLA_OUTPUT_PATH`` selects a separate working copy without replacing an
-existing file. It links, but never edits, the saved core, arm, and clamp sources.
-Run inside FreeCAD after all three component documents are saved.
+existing file. It links, but never edits, the saved base core, offset core,
+arm, and clamp sources. Run inside FreeCAD after all four are saved.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ import Part
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PATH = os.environ.get("STELLA_OUTPUT_PATH", os.path.join(HERE, "StellaOctangula.FCStd"))
 CORE_PATH = os.path.join(HERE, "StellaCore.FCStd")
+OFFSET_CORE_PATH = os.path.join(HERE, "StellaOffsetCore.FCStd")
 ARM_PATH = os.path.join(HERE, "StellaArm.FCStd")
 CLAMP_PATH = os.path.join(HERE, "StellaProfileClamp.FCStd")
 
@@ -33,6 +34,18 @@ BASE_SIGNS = ((1, 1, 1), (1, -1, -1), (-1, 1, -1), (-1, -1, 1))
 OFFSET_SIGNS = tuple((-x, y, z) for x, y, z in BASE_SIGNS)
 EDGES = tuple((i, j) for i in range(4) for j in range(i + 1, 4))
 SEAT_ANGLES = (90.0, 210.0, 330.0)
+
+
+def _edge_face(signs: tuple[tuple[int, int, int], ...], edge_index: int) -> tuple[int, int]:
+    near, far = EDGES[edge_index]
+    shared = [
+        (axis, signs[near][axis])
+        for axis in range(3)
+        if signs[near][axis] == signs[far][axis]
+    ]
+    if len(shared) != 1:
+        raise RuntimeError(f"edge {edge_index} has no unique cube-face normal")
+    return shared[0]
 
 
 def _normalized(vector: App.Vector) -> App.Vector:
@@ -106,11 +119,13 @@ SOURCE_Z = App.Vector(-sqrt(2 / 3), 0.0, 1 / sqrt(3))
 SOURCE_Y = _normalized(SOURCE_Z.cross(SOURCE_X))
 
 
-def _layout(base_side: float, offset_side: float, core_seat_height: float) -> list[tuple]:
+def _layout(
+    side: float, core_seat_height: float, crossing_offset: float, base_seat_radius: float
+) -> list[tuple]:
     layout = []
-    for tetra_name, signs, offset, side in (
-        ("base", BASE_SIGNS, 0.0, base_side),
-        ("offset", OFFSET_SIGNS, CROSSING_OFFSET, offset_side),
+    for tetra_name, signs, offset in (
+        ("base", BASE_SIGNS, 0.0),
+        ("offset", OFFSET_SIGNS, crossing_offset),
     ):
         half_cube = side / sqrt(8)
         vertices = [
@@ -136,6 +151,15 @@ def _layout(base_side: float, offset_side: float, core_seat_height: float) -> li
         for edge_index, (near_index, far_index) in enumerate(EDGES):
             near_vertex, far_vertex = vertices[near_index], vertices[far_index]
             direction = _normalized(far_vertex - near_vertex)
+            shared_axes = [
+                axis for axis in range(3)
+                if abs(near_vertex[axis] - far_vertex[axis]) < 1e-7
+            ]
+            if len(shared_axes) != 1:
+                raise RuntimeError(f"edge {tetra_name}:{edge_index} has no unique cube face")
+            face_normal = App.Vector(0, 0, 0)
+            axis = shared_axes[0]
+            face_normal[axis] = 1.0 if near_vertex[axis] > 0 else -1.0
             arms = []
             for endpoint, desired_direction, endpoint_name in (
                 (near_index, direction, "near"),
@@ -165,12 +189,29 @@ def _layout(base_side: float, offset_side: float, core_seat_height: float) -> li
                 if theta in used_angles[endpoint]:
                     raise RuntimeError(f"core {tetra_name}:{endpoint} reuses seat {theta:g}°")
                 used_angles[endpoint].add(theta)
+                seat_radius = base_seat_radius + offset * sqrt(2 / 3)
                 target_origin = (
                     core_origin
-                    + core_x * (50.0 * cos(radians(theta)))
-                    + core_y * (50.0 * sin(radians(theta)))
+                    + core_x * (seat_radius * cos(radians(theta)))
+                    + core_y * (seat_radius * sin(radians(theta)))
                     + core_z * core_seat_height
                 )
+                if offset:
+                    # Both seats of an edge must translate by the SAME cube-face
+                    # normal. The enlarged core is centred at vertex + sign*d/3;
+                    # its seats are farther out by d*sqrt(2/3) in its own plane.
+                    vertex = vertices[endpoint]
+                    base_origin = vertex + (
+                        core_x * (base_seat_radius * cos(radians(theta)))
+                        + core_y * (base_seat_radius * sin(radians(theta)))
+                        + core_z * core_seat_height
+                    )
+                    displacement = target_origin - base_origin
+                    if (displacement - face_normal * offset).Length > 1e-6:
+                        raise RuntimeError(
+                            f"offset seat does not follow face normal: {tetra_name} "
+                            f"edge {edge_index} {endpoint_name}"
+                        )
                 arm_placement = _source_to_target(
                     SOURCE_ROOT,
                     SOURCE_X,
@@ -296,32 +337,59 @@ def build() -> App.Document:
         raise RuntimeError(f"assembly output directory does not exist: {OUTPUT_PATH}")
 
     core_doc = _open_source_document(documents, "StellaCore", CORE_PATH)
+    offset_core_doc = _open_source_document(documents, "StellaOffsetCore", OFFSET_CORE_PATH)
     arm_doc = _open_source_document(documents, "StellaArm", ARM_PATH)
     clamp_doc = _open_source_document(documents, "StellaProfileClamp", CLAMP_PATH)
     core_source = _require_source_object(core_doc, "CoreBody", "PartDesign::Body")
+    offset_core_source = _require_source_object(offset_core_doc, "CoreBody", "PartDesign::Body")
     arm_source = _require_source_object(arm_doc, "ArmBody", "PartDesign::Body")
     connector_source = _require_source_object(arm_doc, "ConnectorBody", "PartDesign::Body")
     clamp_source = _require_source_object(clamp_doc, "ProfileClampBody", "PartDesign::Body")
-    if not arm_source.ViewObject.Visibility:
+    arm_view = getattr(arm_source, "ViewObject", None)
+    if arm_view is not None and not arm_view.Visibility:
         raise RuntimeError("ArmBody must be visible in StellaArm")
     # ConnectorBody is already fused into ArmBody. Link the final arm only;
     # ConnectorBody may be hidden to avoid duplicate printable solids.
     core_params = core_doc.getObject("StellaParams")
-    if core_params is None or "CoreHeight" not in core_params.PropertiesList:
-        raise RuntimeError("StellaCore.StellaParams.CoreHeight is required")
+    if core_params is None or not {"CoreHeight", "SeatCentreRadius"}.issubset(
+        core_params.PropertiesList
+    ):
+        raise RuntimeError("StellaCore.StellaParams.CoreHeight and SeatCentreRadius are required")
     core_seat_height = core_params.CoreHeight.Value
+    base_seat_radius = core_params.SeatCentreRadius.Value
     if core_seat_height <= 0:
         raise RuntimeError("core seat height must be positive")
+    offset_params = offset_core_doc.getObject("StellaParams")
+    if offset_params is None or not {"EdgeOffset", "CoreHeight", "SeatCentreRadius"}.issubset(
+        offset_params.PropertiesList
+    ):
+        raise RuntimeError(
+            "StellaOffsetCore.StellaParams.EdgeOffset, CoreHeight, and SeatCentreRadius are required"
+        )
+    crossing_offset = offset_params.EdgeOffset.Value
+    if abs(offset_params.CoreHeight.Value - core_seat_height) > 1e-6:
+        raise RuntimeError("base and offset cores must have the same seat height")
+    if abs(crossing_offset - CROSSING_OFFSET) > 1e-6:
+        raise RuntimeError(
+            f"offset core EdgeOffset={crossing_offset:.6f} mm; "
+            f"assembly requires {CROSSING_OFFSET:.6f} mm"
+        )
+    expected_seat_radius = base_seat_radius + crossing_offset * sqrt(2 / 3)
+    if abs(offset_params.SeatCentreRadius.Value - expected_seat_radius) > 1e-6:
+        raise RuntimeError("offset core seat radius does not match the outward face offset")
 
     initial_side = PROFILE_LENGTH + 2 * ARM_SADDLE_START
-    initial_layout = _layout(initial_side, initial_side, core_seat_height)
+    initial_layout = _layout(
+        initial_side, core_seat_height, crossing_offset, base_seat_radius
+    )
     base_direction, base_arms = initial_layout[0][3:]
     offset_direction, offset_arms = initial_layout[len(EDGES)][3:]
     base_initial_span = (base_arms[1][4] - base_arms[0][4]).dot(base_direction)
     offset_initial_span = (offset_arms[1][4] - offset_arms[0][4]).dot(offset_direction)
-    base_side = initial_side + PROFILE_LENGTH - base_initial_span
-    offset_side = initial_side + PROFILE_LENGTH - offset_initial_span
-    layout_data = _layout(base_side, offset_side, core_seat_height)
+    if abs(base_initial_span - offset_initial_span) > 1e-6:
+        raise RuntimeError("outward face offset changed the second tetrahedron side")
+    side = initial_side + PROFILE_LENGTH - base_initial_span
+    layout_data = _layout(side, core_seat_height, crossing_offset, base_seat_radius)
     span_error = 0.0
     line_error = 0.0
     for _, _, _, direction, arms in layout_data:
@@ -349,9 +417,9 @@ def build() -> App.Document:
             ("ArmSaddleStart", ARM_SADDLE_START),
             ("CoreSeatHeight", core_seat_height),
             ("CableDiameter", CABLE_DIAMETER),
-            ("CrossingOffset", CROSSING_OFFSET),
-            ("BaseTetrahedronSide", base_side),
-            ("OffsetTetrahedronSide", offset_side),
+            ("CrossingOffset", crossing_offset),
+            ("BaseTetrahedronSide", side),
+            ("OffsetTetrahedronSide", side),
         ):
             params.addProperty("App::PropertyLength", name, "Layout dimensions")
             setattr(params, name, value)
@@ -361,7 +429,8 @@ def build() -> App.Document:
         params.LayoutIntent = (
             "Twelve complete 1.5 m LED profile assemblies on two interpenetrating "
             "tetrahedra, using exact build123d extrusion, diffuser, endcaps, glands, "
-            "and cable stubs. Core seats face inward along each closed-frame edge."
+            "and cable stubs. Offset lamps move outward along each cube-face normal "
+            "and mate to enlarged offset cores; both frames have equal sides."
         )
 
         sources = document.addObject("App::Part", "ReferenceSources")
@@ -460,6 +529,9 @@ def build() -> App.Document:
             ]
         ] = []
         cable_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
+        crossing_profiles: dict[
+            tuple[str, tuple[int, int]], tuple[App.DocumentObject, App.DocumentObject]
+        ] = {}
         core_counter = arm_counter = clamp_counter = lamp_counter = 0
         for tetra_name, edge_index, cores, direction, arms in layout_data:
             if edge_index == 0:
@@ -469,7 +541,7 @@ def build() -> App.Document:
                         document,
                         f"Core_{tetra_name}_{index}",
                         f"Organic vertex core — {tetra_name} {index}",
-                        core_source,
+                        core_source if tetra_name == "base" else offset_core_source,
                         core_placement,
                         cores_group,
                         (0.17, 0.20, 0.24),
@@ -512,7 +584,7 @@ def build() -> App.Document:
             lamp = document.addObject("App::Part", f"Lamp_{tetra_name}_{edge_index}")
             lamp.Label = f"LED profile assembly — {tetra_name} lamp {edge_index}"
             lamps_group.addObject(lamp)
-            lamp.ViewObject.Visibility = True
+            _set_view_property(lamp, "Visibility", True)
             component_specs = (
                 ("Aluminium", "Aluminium profile", profile_source, (0.42, 0.45, 0.49), None),
                 ("Diffuser", "Diffuser", diffuser_source, (0.95, 0.95, 0.80), 35),
@@ -548,6 +620,12 @@ def build() -> App.Document:
                 cable_far_link,
             ) = links
             cable_links.extend(((cable_near_link, near_arm), (cable_far_link, far_arm)))
+            face = _edge_face(
+                BASE_SIGNS if tetra_name == "base" else OFFSET_SIGNS, edge_index
+            )
+            if (tetra_name, face) in crossing_profiles:
+                raise RuntimeError(f"duplicate crossing face: {tetra_name} {face}")
+            crossing_profiles[(tetra_name, face)] = (aluminium_link, diffuser_link)
             profile_pairs.append((aluminium_link, diffuser_link, near_arm, far_arm))
             clamp_profile_pairs.extend(
                 (
@@ -613,6 +691,38 @@ def build() -> App.Document:
             )
         if max_profile_overlap > 0.01:
             raise RuntimeError(f"profile or diffuser intersects its saddle: {max_profile_overlap:.6f} mm^3")
+        crossing_faces = {_edge_face(BASE_SIGNS, edge) for edge in range(len(EDGES))}
+        if len(crossing_faces) != 6 or len(crossing_profiles) != 12:
+            raise RuntimeError("expected six face crossings and twelve lamp profiles")
+        max_crossing_overlap = 0.0
+        min_crossing_clearance = float("inf")
+        for face in crossing_faces:
+            base_aluminium, base_diffuser = crossing_profiles[("base", face)]
+            offset_aluminium, offset_diffuser = crossing_profiles[("offset", face)]
+            for base_piece, offset_piece in (
+                (base_aluminium, offset_aluminium),
+                (base_aluminium, offset_diffuser),
+                (base_diffuser, offset_aluminium),
+                (base_diffuser, offset_diffuser),
+            ):
+                max_crossing_overlap = max(
+                    max_crossing_overlap,
+                    base_piece.Shape.common(offset_piece.Shape).Volume,
+                )
+                min_crossing_clearance = min(
+                    min_crossing_clearance,
+                    base_piece.Shape.distToShape(offset_piece.Shape)[0],
+                )
+        if max_crossing_overlap > 1e-5 or min_crossing_clearance <= 1e-5:
+            raise RuntimeError(
+                "profile crossing interference: "
+                f"overlap={max_crossing_overlap:.6f} mm^3, "
+                f"clearance={min_crossing_clearance:.6f} mm"
+            )
+        assembly.addProperty("App::PropertyVolume", "MaxCrossingOverlap", "Validation")
+        assembly.MaxCrossingOverlap = max_crossing_overlap
+        assembly.addProperty("App::PropertyLength", "MinCrossingClearance", "Validation")
+        assembly.MinCrossingClearance = min_crossing_clearance
         assembly.addProperty("App::PropertyVolume", "MaxCableArmOverlap", "Validation")
         assembly.MaxCableArmOverlap = max_cable_overlap
         assembly.addProperty("App::PropertyBool", "CableRouteClear", "Validation")
@@ -642,8 +752,8 @@ def build() -> App.Document:
             "cable_stubs": len(cable_links),
             "endcaps_per_lamp": 2,
             "glands_per_lamp": 2,
-            "base_tetrahedron_side": round(base_side, 6),
-            "offset_tetrahedron_side": round(offset_side, 6),
+            "base_tetrahedron_side": round(side, 6),
+            "offset_tetrahedron_side": round(side, 6),
             "profile_span_error": span_error,
             "profile_line_error": line_error,
             "max_arm_core_overlap": max_joint_overlap,
@@ -652,6 +762,8 @@ def build() -> App.Document:
             "max_clamp_profile_overlap": max_clamp_profile_overlap,
             "max_cable_arm_overlap": max_cable_overlap,
             "max_profile_saddle_overlap": max_profile_overlap,
+            "max_crossing_overlap": max_crossing_overlap,
+            "min_crossing_clearance": min_crossing_clearance,
         }
     )
     return document

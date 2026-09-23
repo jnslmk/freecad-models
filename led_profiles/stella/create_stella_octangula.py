@@ -1,8 +1,9 @@
-"""Build the Stella-octangula layout from the authoritative arm and core files.
+"""Build the Stella-octangula layout from the authoritative component files.
 
-Scope: creates only ``StellaOctangula.FCStd``. It opens and links the existing
-``StellaCore.FCStd`` and ``StellaArm.FCStd`` files; it never edits either source.
-Run inside FreeCAD after the arm and core source documents are saved.
+Scope: creates one new assembly file. The default is ``StellaOctangula.FCStd``;
+``STELLA_OUTPUT_PATH`` selects a separate working copy without replacing an
+existing file. It links, but never edits, the saved core, arm, and clamp sources.
+Run inside FreeCAD after all three component documents are saved.
 """
 
 from __future__ import annotations
@@ -14,9 +15,10 @@ import FreeCAD as App
 import Part
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_PATH = os.path.join(HERE, "StellaOctangula.FCStd")
+OUTPUT_PATH = os.environ.get("STELLA_OUTPUT_PATH", os.path.join(HERE, "StellaOctangula.FCStd"))
 CORE_PATH = os.path.join(HERE, "StellaCore.FCStd")
 ARM_PATH = os.path.join(HERE, "StellaArm.FCStd")
+CLAMP_PATH = os.path.join(HERE, "StellaProfileClamp.FCStd")
 
 PROFILE_LENGTH = 1500.0
 PROFILE_WIDTH = 26.1
@@ -104,7 +106,7 @@ SOURCE_Z = App.Vector(-sqrt(2 / 3), 0.0, 1 / sqrt(3))
 SOURCE_Y = _normalized(SOURCE_Z.cross(SOURCE_X))
 
 
-def _layout(base_side: float, offset_side: float) -> list[tuple]:
+def _layout(base_side: float, offset_side: float, core_seat_height: float) -> list[tuple]:
     layout = []
     for tetra_name, signs, offset, side in (
         ("base", BASE_SIGNS, 0.0, base_side),
@@ -167,7 +169,7 @@ def _layout(base_side: float, offset_side: float) -> list[tuple]:
                     core_origin
                     + core_x * (50.0 * cos(radians(theta)))
                     + core_y * (50.0 * sin(radians(theta)))
-                    + core_z * 20.0
+                    + core_z * core_seat_height
                 )
                 arm_placement = _source_to_target(
                     SOURCE_ROOT,
@@ -286,34 +288,40 @@ def _import_step_source(
 
 def build() -> App.Document:
     documents = App.listDocuments()
-    if "StellaOctangula" in documents:
-        raise RuntimeError(
-            "StellaOctangula is already open; close it before rebuilding the saved assembly"
-        )
     if os.path.exists(OUTPUT_PATH):
         raise RuntimeError(
             f"refusing to replace existing assembly: {OUTPUT_PATH}; remove it deliberately first"
         )
+    if not os.path.isdir(os.path.dirname(os.path.realpath(OUTPUT_PATH))):
+        raise RuntimeError(f"assembly output directory does not exist: {OUTPUT_PATH}")
 
     core_doc = _open_source_document(documents, "StellaCore", CORE_PATH)
     arm_doc = _open_source_document(documents, "StellaArm", ARM_PATH)
+    clamp_doc = _open_source_document(documents, "StellaProfileClamp", CLAMP_PATH)
     core_source = _require_source_object(core_doc, "CoreBody", "PartDesign::Body")
     arm_source = _require_source_object(arm_doc, "ArmBody", "PartDesign::Body")
     connector_source = _require_source_object(arm_doc, "ConnectorBody", "PartDesign::Body")
-    if not arm_source.ViewObject.Visibility or not connector_source.ViewObject.Visibility:
-        raise RuntimeError("ConnectorBody and ArmBody must both be visible in StellaArm")
+    clamp_source = _require_source_object(clamp_doc, "ProfileClampBody", "PartDesign::Body")
+    if not arm_source.ViewObject.Visibility:
+        raise RuntimeError("ArmBody must be visible in StellaArm")
     # ConnectorBody is already fused into ArmBody. Link the final arm only;
-    # its saved per-face colors distinguish the connector without duplicate solids.
+    # ConnectorBody may be hidden to avoid duplicate printable solids.
+    core_params = core_doc.getObject("StellaParams")
+    if core_params is None or "CoreHeight" not in core_params.PropertiesList:
+        raise RuntimeError("StellaCore.StellaParams.CoreHeight is required")
+    core_seat_height = core_params.CoreHeight.Value
+    if core_seat_height <= 0:
+        raise RuntimeError("core seat height must be positive")
 
     initial_side = PROFILE_LENGTH + 2 * ARM_SADDLE_START
-    initial_layout = _layout(initial_side, initial_side)
+    initial_layout = _layout(initial_side, initial_side, core_seat_height)
     base_direction, base_arms = initial_layout[0][3:]
     offset_direction, offset_arms = initial_layout[len(EDGES)][3:]
     base_initial_span = (base_arms[1][4] - base_arms[0][4]).dot(base_direction)
     offset_initial_span = (offset_arms[1][4] - offset_arms[0][4]).dot(offset_direction)
     base_side = initial_side + PROFILE_LENGTH - base_initial_span
     offset_side = initial_side + PROFILE_LENGTH - offset_initial_span
-    layout_data = _layout(base_side, offset_side)
+    layout_data = _layout(base_side, offset_side, core_seat_height)
     span_error = 0.0
     line_error = 0.0
     for _, _, _, direction, arms in layout_data:
@@ -339,6 +347,7 @@ def build() -> App.Document:
             ("ProfileHeight", PROFILE_HEIGHT),
             ("ProfileRimHeight", PROFILE_RIM_Z),
             ("ArmSaddleStart", ARM_SADDLE_START),
+            ("CoreSeatHeight", core_seat_height),
             ("CableDiameter", CABLE_DIAMETER),
             ("CrossingOffset", CROSSING_OFFSET),
             ("BaseTetrahedronSide", base_side),
@@ -425,19 +434,23 @@ def build() -> App.Document:
         _set_view_property(sources, "Visibility", False)
 
         assembly = document.addObject("App::Part", "StellaOctangula")
-        assembly.Label = "Stella octangula — 12 complete LED profiles, 8 cores, 24 arms"
+        assembly.Label = "Stella octangula — 12 LED profiles, 8 cores, 24 arms and clamps"
         cores_group = document.addObject("App::Part", "VertexCores")
         cores_group.Label = "Vertex cores — 8 linked instances"
         arms_group = document.addObject("App::Part", "ProfileArms")
         arms_group.Label = "Profile arms — 24 linked instances"
+        clamps_group = document.addObject("App::Part", "ProfileClamps")
+        clamps_group.Label = "Profile clamps — 24 linked native instances"
         lamps_group = document.addObject("App::Part", "LEDProfileAssemblies")
         lamps_group.Label = "Complete LED profile assemblies — 12 lamps"
-        for group in (cores_group, arms_group, lamps_group):
+        for group in (cores_group, arms_group, clamps_group, lamps_group):
             assembly.addObject(group)
 
 
         core_links: dict[tuple[str, int], App.DocumentObject] = {}
         arm_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
+        clamp_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
+        clamp_profile_pairs: list[tuple[App.DocumentObject, App.DocumentObject, App.DocumentObject]] = []
         profile_pairs: list[
             tuple[
                 App.DocumentObject,
@@ -447,7 +460,7 @@ def build() -> App.Document:
             ]
         ] = []
         cable_links: list[tuple[App.DocumentObject, App.DocumentObject]] = []
-        core_counter = arm_counter = lamp_counter = 0
+        core_counter = arm_counter = clamp_counter = lamp_counter = 0
         for tetra_name, edge_index, cores, direction, arms in layout_data:
             if edge_index == 0:
                 for index, (core_origin, core_x, core_y, core_z) in enumerate(cores):
@@ -464,6 +477,7 @@ def build() -> App.Document:
                     core_counter += 1
 
             arm_by_endpoint = {}
+            clamp_by_endpoint = {}
             for endpoint_name, endpoint, theta, arm_placement, seat_start in arms:
                 arm_link = _add_link(
                     document,
@@ -477,6 +491,18 @@ def build() -> App.Document:
                 arm_by_endpoint[endpoint_name] = (arm_placement, seat_start, arm_link)
                 arm_links.append((arm_link, core_links[(tetra_name, endpoint)]))
                 arm_counter += 1
+                clamp_link = _add_link(
+                    document,
+                    f"Clamp_{tetra_name}_{edge_index}_{endpoint_name}",
+                    f"Profile clamp — {tetra_name} edge {edge_index} {endpoint_name}",
+                    clamp_source,
+                    arm_placement,
+                    clamps_group,
+                    (0.48, 0.50, 0.54),
+                )
+                clamp_by_endpoint[endpoint_name] = clamp_link
+                clamp_links.append((clamp_link, arm_link))
+                clamp_counter += 1
 
             near_placement, _, near_arm = arm_by_endpoint["near"]
             _, _, far_arm = arm_by_endpoint["far"]
@@ -523,14 +549,23 @@ def build() -> App.Document:
             ) = links
             cable_links.extend(((cable_near_link, near_arm), (cable_far_link, far_arm)))
             profile_pairs.append((aluminium_link, diffuser_link, near_arm, far_arm))
+            clamp_profile_pairs.extend(
+                (
+                    (clamp_by_endpoint["near"], aluminium_link, diffuser_link),
+                    (clamp_by_endpoint["far"], aluminium_link, diffuser_link),
+                )
+            )
             lamp_counter += 1
 
         document.recompute()
+        params.addProperty("App::PropertyInteger", "ClampInstances", "Layout dimensions")
+        params.ClampInstances = clamp_counter
         invalid = [
             obj.Name
             for obj in (
                 *core_links.values(),
                 *(arm for arm, _ in arm_links),
+                *(clamp for clamp, _ in clamp_links),
                 *(cable for cable, _ in cable_links),
                 *(obj for pair in profile_pairs for obj in pair[:2]),
             )
@@ -540,6 +575,19 @@ def build() -> App.Document:
             raise RuntimeError(f"invalid linked geometry: {invalid}")
         max_joint_overlap = max(
             (arm.Shape.common(core.Shape).Volume for arm, core in arm_links), default=0.0
+        )
+        max_joint_gap = max(
+            (arm.Shape.distToShape(core.Shape)[0] for arm, core in arm_links), default=0.0
+        )
+        max_clamp_arm_overlap = max(
+            (clamp.Shape.common(arm.Shape).Volume for clamp, arm in clamp_links), default=0.0
+        )
+        max_clamp_profile_overlap = max(
+            max(
+                clamp.Shape.common(aluminium.Shape).Volume,
+                clamp.Shape.common(diffuser.Shape).Volume,
+            )
+            for clamp, aluminium, diffuser in clamp_profile_pairs
         )
         max_cable_overlap = max(
             (cable.Shape.common(arm.Shape).Volume for cable, arm in cable_links),
@@ -556,6 +604,13 @@ def build() -> App.Document:
         )
         if max_joint_overlap > 0.01:
             raise RuntimeError(f"arm/core material overlap is too large: {max_joint_overlap:.6f} mm^3")
+        if max_joint_gap > 1e-4:
+            raise RuntimeError(f"arm/core seating gap is too large: {max_joint_gap:.6f} mm")
+        if max_clamp_arm_overlap > 0.01 or max_clamp_profile_overlap > 0.01:
+            raise RuntimeError(
+                "clamp interference: "
+                f"arm={max_clamp_arm_overlap:.6f}, profile={max_clamp_profile_overlap:.6f} mm^3"
+            )
         if max_profile_overlap > 0.01:
             raise RuntimeError(f"profile or diffuser intersects its saddle: {max_profile_overlap:.6f} mm^3")
         assembly.addProperty("App::PropertyVolume", "MaxCableArmOverlap", "Validation")
@@ -583,6 +638,7 @@ def build() -> App.Document:
             "profiles": lamp_counter,
             "cores": core_counter,
             "arms": arm_counter,
+            "clamps": clamp_counter,
             "cable_stubs": len(cable_links),
             "endcaps_per_lamp": 2,
             "glands_per_lamp": 2,
@@ -591,6 +647,9 @@ def build() -> App.Document:
             "profile_span_error": span_error,
             "profile_line_error": line_error,
             "max_arm_core_overlap": max_joint_overlap,
+            "max_arm_core_gap": max_joint_gap,
+            "max_clamp_arm_overlap": max_clamp_arm_overlap,
+            "max_clamp_profile_overlap": max_clamp_profile_overlap,
             "max_cable_arm_overlap": max_cable_overlap,
             "max_profile_saddle_overlap": max_profile_overlap,
         }

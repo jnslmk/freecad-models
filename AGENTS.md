@@ -35,6 +35,7 @@ Before altering layout, mating geometry, cable paths, optical openings, or struc
 - Prefer native parametric FreeCAD modeling over final BREP or scripted-only geometry.
 - Use `App::VarSet` as the model-level parameter container when targeting FreeCAD 1.0 or newer. Give it a stable name such as `StellaParams` and use typed properties (`App::PropertyLength`, `App::PropertyAngle`, `App::PropertyInteger`, `App::PropertyFloat`, `App::PropertyBool`, `App::PropertyString`, or `App::PropertyEnumeration`).
 - Drive native feature properties and named Sketcher constraints with FreeCAD expressions such as `StellaParams.CoreHeight`; preserve units and recompute to verify dependency updates.
+- Encode relative design intent as native dependencies: center, align, mirror, and space features from the dimensions or geometry that drive them, so changing a parent dimension preserves those relationships without manual repositioning. Keep an independent dimension only when it is intentionally a fixed interface.
 - Use named Sketcher constraints for sketch-local design intent. Use spreadsheets only for tabular calculations, ranges, reports, or FreeCAD 0.21 compatibility.
 - Keep editable sketches and dependent native operations in the document tree. Use a final `Part::Feature` only for explicitly imported or reference-only geometry.
 - Apply a repeated-feature budget: for identical additions or cuts, use one constrained multi-profile sketch and one native operation or pattern; retain a separate feature only for an independent design parameter, operation type, or validation measurement.
@@ -49,7 +50,7 @@ After a geometry change, verify the affected model before delivery:
 
 1. Recompute and check for invalid or error-state objects and failed features.
 2. Measure the requested dimensions and clearances; check expected native object types, expressions, dependencies, final Body tip, and the deliberate native feature counts/types. Reject duplicate printable solids; reference-only `Part::Feature` objects are permitted.
-3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm the expected geometry change without rerunning an external script. Restore the original value and recompute before saving.
+3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm both the expected geometry change and any intended relative relationships without rerunning an external script. Restore the original value and recompute before saving.
 4. Save and repeat the relevant state and geometry checks against the persisted file. If no user sketch is being edited, close and reload it; otherwise keep the edit session open and inspect the saved `.FCStd` in a separate headless FreeCAD process. Preserve unsaved user work.
 5. Inspect an isometric view and any orthographic or section views needed to prove the visible shape; confirm the intended objects, visibility, and body tip. Screenshots complement measurements; they do not replace them.
 

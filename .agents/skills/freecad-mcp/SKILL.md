@@ -81,6 +81,13 @@ running.
    Sketcher positions `1` and `2` need not match
    `sketch.Geometry[i].StartPoint` and `.EndPoint`. Check the actual points
    before adding coincidence or symmetry constraints.
+
+   To use a source face's intersection with the sketch plane as the profile,
+   call `sketch.addExternal(source.Name, "FaceN", defining=True, intersection=True)`.
+   A face may yield multiple segments; check the
+   resulting `ExternalGeo`, closed `Shape.Wires`, and dependent feature.
+   Ordinary edge projection uses `intersection=False`.
+
 3. Wrap each coherent document mutation in a transaction. Recompute and check
    the affected objects before committing; abort on exceptions or failed
    validation. Keep saving outside the transaction so failed edits are not
@@ -103,6 +110,10 @@ running.
    pre-edit checkpoint before continuing. A rollback can silently remove an
    unrelated constraint (observed for an outer-arc radius after changing a
    different sketch's placement).
+
+   After replacing geometry in a pipe spine sketch, recompute the sketch,
+   clear `pipe.Spine`, reassign it to the new edge, and recompute the pipe.
+   The old subelement reference can be stale even when it still reads `Edge1`.
 
 4. Query the affected properties and validity. Use `get_view` or an enabled
    per-call screenshot for visual evidence, alongside the geometry checks in

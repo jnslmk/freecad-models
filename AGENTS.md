@@ -50,6 +50,7 @@ After a geometry change, verify the affected model before delivery:
 
 1. Recompute and check for invalid or error-state objects and failed features.
 2. Measure the requested dimensions and clearances; check expected native object types, expressions, dependencies, final Body tip, and the deliberate native feature counts/types. Reject duplicate printable solids; reference-only `Part::Feature` objects are permitted.
+   For additive features with a BaseFeature, also check that `feature.BaseFeature.Shape.cut(feature.Shape).Volume` is within modeling tolerance of zero: a valid single solid can still have lost parent material.
 3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm both the expected geometry change and any intended relative relationships without rerunning an external script. Restore the original value and recompute before saving.
 4. Save and repeat the relevant state and geometry checks against the persisted file. If no user sketch is being edited, close and reload it; otherwise keep the edit session open and inspect the saved `.FCStd` in a separate headless FreeCAD process. Preserve unsaved user work.
 5. Inspect an isometric view and any orthographic or section views needed to prove the visible shape; confirm the intended objects, visibility, and body tip. Screenshots complement measurements; they do not replace them.

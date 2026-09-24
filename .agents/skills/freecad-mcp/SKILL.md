@@ -74,6 +74,13 @@ running.
    Active-document fallback requires an explicit caller decision and the same
    expected-path validation.
 2. Make small, coherent edits through GUI-thread Python or document tools. Follow the repository's modeling contract; a persistent builder script is optional, not a prerequisite. If a scoped reusable script exists, inspect it before executing it against a live document.
+
+   In a live Sketcher edit, keep the sketch open and operate on its current
+   in-memory geometry. For arc endpoint constraints, query
+   `sketch.getPoint(geometry_index, point_position)`: with reversed arcs,
+   Sketcher positions `1` and `2` need not match
+   `sketch.Geometry[i].StartPoint` and `.EndPoint`. Check the actual points
+   before adding coincidence or symmetry constraints.
 3. Wrap each coherent document mutation in a transaction. Recompute and check
    the affected objects before committing; abort on exceptions or failed
    validation. Keep saving outside the transaction so failed edits are not
@@ -91,6 +98,12 @@ running.
        raise
    ```
 
+   After `abortTransaction()` or GUI undo during sketch editing, compare
+   geometry count, constraint count, named constraints, and DoF with the
+   pre-edit checkpoint before continuing. A rollback can silently remove an
+   unrelated constraint (observed for an outer-arc radius after changing a
+   different sketch's placement).
+
 4. Query the affected properties and validity. Use `get_view` or an enabled
    per-call screenshot for visual evidence, alongside the geometry checks in
    `AGENTS.md`.
@@ -105,8 +118,10 @@ reload result, and required views. Inspect the Report View after an exception,
 timeout, or substantial build; its messages and tracebacks are recovery evidence.
 A successful tool response alone is not geometry proof.
 
-Save, close/reload, and inspect again before delivery. Preserve unsaved user
-work before closing or reloading; a headless output must not silently replace it.
+Save and inspect the persisted result before delivery. With no active user
+sketch edit, close/reload the GUI document and inspect again. During an active
+sketch edit, preserve that session and independently open the saved `.FCStd`
+headlessly to verify persistence; never reload over unsaved GUI work.
 
 If a GUI operation times out, query `get_rpc_status` from a separate client and
 open the Report View. Wait for a healthy dispatcher, then inspect the resolved

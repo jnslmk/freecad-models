@@ -20,6 +20,14 @@
 3. Before the first mutation, establish a reversible checkpoint for every file the agent will change. A clean tracked file can use its Git revision; for a dirty file, preserve its exact pre-agent state under ignored `.codex-tmp/` after reconciling unsaved GUI work. Use small FreeCAD transactions and validate each edit before saving. Never use a blanket reset, stash, or restore over unrelated or intervening user work.
 4. Present the changed document as **pending review** with measured interfaces, relevant isometric and close-up/section views, native-feature validity, and explicit tradeoffs. Ask whether to accept or reject it; a technically valid concept is not automatically an accepted design. On acceptance, stage and commit only the agreed files. On rejection, roll back only the agent's changes to the recorded baseline, then reopen and verify the restored native document. If the user has edited it meanwhile, reconcile those edits before rollback. Leave undecided work uncommitted and clearly identified.
 
+### Live Sketcher collaboration
+
+- If `Gui.activeDocument().getInEdit()` names a sketch, checkpoint its in-memory state with `doc.saveCopy(...)` and continue in that sketch through small native MCP edits. Preserve its edit mode, camera, and selection rather than reopening the saved file.
+- Model a requested mirror with Sketcher symmetry constraints about the chosen axis, not merely mirrored coordinates. Check the closed wire, remaining degrees of freedom, and dependent solid.
+- After aborting or undoing a sketch edit, compare geometry, constraints, and degrees of freedom with the checkpoint before retrying; rollback can lose an unrelated constraint.
+- Measure dependent interfaces on the resulting solid (for example, pilot depth from the actual material face, not just `Pocket.Length`). Ask before changing an unrequested mating interface.
+- During active iteration, seek accept/reject at a natural design milestone rather than after each tweak. An explicit request to commit accepts the agreed files, not unrelated unsaved work.
+
 Before altering layout, mating geometry, cable paths, optical openings, or structural support, distinguish fixed interfaces from design freedom and ask about consequential tradeoffs. For product-form work, inspect the whole assembly and the user's marked viewpoint; check silhouette, surface hierarchy, seam placement, and continuity at the joins, not just whether features fuse. Nominal CAD clearance or interference does not establish a PETG print fit or holding force.
 
 ## FreeCAD modeling
@@ -42,7 +50,7 @@ After a geometry change, verify the affected model before delivery:
 1. Recompute and check for invalid or error-state objects and failed features.
 2. Measure the requested dimensions and clearances; check expected native object types, expressions, dependencies, final Body tip, and the deliberate native feature counts/types. Reject duplicate printable solids; reference-only `Part::Feature` objects are permitted.
 3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm the expected geometry change without rerunning an external script. Restore the original value and recompute before saving.
-4. Save, close, reload, and repeat the relevant state and geometry checks. Preserve unsaved user work before closing or reloading.
+4. Save and repeat the relevant state and geometry checks against the persisted file. If no user sketch is being edited, close and reload it; otherwise keep the edit session open and inspect the saved `.FCStd` in a separate headless FreeCAD process. Preserve unsaved user work.
 5. Inspect an isometric view and any orthographic or section views needed to prove the visible shape; confirm the intended objects, visibility, and body tip. Screenshots complement measurements; they do not replace them.
 
 For an assembly, check the saved links and every repeated joint, including fasteners, profile crossings, diffuser/cable openings, and actual support contacts. For FEM or topology work, establish the real load path, joints, supports, material and print orientation before interpreting a result; validate the baseline solve and mesh, and label studies with assumed clip stiffness or untested fits as conditional rather than a safe-service design.

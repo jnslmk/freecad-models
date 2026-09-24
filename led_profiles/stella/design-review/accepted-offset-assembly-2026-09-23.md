@@ -38,10 +38,9 @@ the 24 modeled endcap/gland mating pairs. The offset core has one valid closed
 native solid, tip `RadialSeatPattern`; a small `EdgeOffset` perturbation moved
 the dependent seats/pilots, was restored, and survived save/reload.
 
-The [isometric](accepted-offset-assembly-iso.png),
-[front](accepted-offset-assembly-front.png), and
-[top](accepted-offset-assembly-top.png) FreeCAD views were inspected after the
-change. Screenshots complement rather than replace the geometry checks.
+Isometric, front, and top FreeCAD views were inspected after the change.
+The diagnostic screenshots are not retained in Git; the native documents and
+recorded measurements remain the durable evidence.
 
 ## Still unresolved
 

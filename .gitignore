@@ -1,6 +1,8 @@
 __pycache__/
 *.py[cod]
 *.FCBak
+*.FCStd[0-9]*
+led_profiles/stella/design-review/*.png
 .omp/
 /freecad-mcp/
 .implement-review/

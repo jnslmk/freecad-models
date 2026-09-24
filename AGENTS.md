@@ -9,6 +9,11 @@
 - Avoid partial builder scripts that duplicate the document and drift out of sync. Keep one-off diagnostic and editing snippets out of the repository.
 - Existing Stella arm geometry and its accompanying script are outside instruction-maintenance work; leave their migration to a separately requested task.
 
+## Diagnostic screenshots
+
+- Save agent-captured debugging or inspection screenshots under `.codex-tmp/screenshots/<task-name>/` in this workspace. Create the directory before capture; `.codex-tmp/` is ignored by Git.
+- Keep screenshot paths out of `design-review/` and other tracked model/documentation directories. Use the native `.FCStd` and written measurements for durable design evidence; only add an image to Git when the user explicitly requests a published visual artifact.
+
 ## Concept and implementation work
 
 - In concept mode, preserve the user's original and create clearly named alternatives with a short note stating what differs.

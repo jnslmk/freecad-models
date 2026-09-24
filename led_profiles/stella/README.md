@@ -4,11 +4,16 @@ The selected compact PETG assembly is [`StellaOctangula.FCStd`](StellaOctangula.
 It links the following native source documents in this directory:
 
 - [`StellaCore.FCStd`](StellaCore.FCStd) — four base cores
-- [`StellaOffsetCore.FCStd`](StellaOffsetCore.FCStd) — four offset cores
+- [`StellaOffsetCore.FCStd`](StellaOffsetCore.FCStd) — four offset variants of the integrated organic `StellaCore` saddle, with the 30.75 mm crossing offset
 - [`StellaProfileClamp.FCStd`](StellaProfileClamp.FCStd) — 24 counter-clamps
 
 The assembly also contains its profile components and 96 internal links. Keep
 these four `.FCStd` files together so the relative external links resolve.
+
+All 24 counter-clamps are positioned on the corresponding core's M3 pilot axes.
+The offset core retains the native web, transition loft, integrated saddles, and
+blind pilot features; its old separate bosses and channel cuts are gone.
+
 Earlier review files were removed from the working tree; tracked versions remain
 available in Git history.
 

@@ -7,18 +7,20 @@
 - Persist design intent in native features, constraints, expressions, and `App::VarSet`; MCP call history is not documentation.
 - Add a sibling Python script only for intentionally generated models, repeatable operations across documents, or migrations that need a reusable procedure. Record its scope and whether it rebuilds or edits an existing document; preserve unrelated and unsaved user work.
 - Avoid partial builder scripts that duplicate the document and drift out of sync. Keep one-off diagnostic and editing snippets out of the repository.
-- Existing Stella arm geometry and its accompanying script are outside instruction-maintenance work; leave their migration to a separately requested task.
 
 ## Diagnostic screenshots
 
 - Save agent-captured debugging or inspection screenshots under `.codex-tmp/screenshots/<task-name>/` in this workspace. Create the directory before capture; `.codex-tmp/` is ignored by Git.
-- Keep screenshot paths out of `design-review/` and other tracked model/documentation directories. Use the native `.FCStd` and written measurements for durable design evidence; only add an image to Git when the user explicitly requests a published visual artifact.
+- Keep screenshot paths out of tracked model/documentation directories. Use the native `.FCStd` and written measurements for durable design evidence; only add an image to Git when the user explicitly requests a published visual artifact.
 
-## Concept and implementation work
+## One-document CAD review loop
 
-- In concept mode, preserve the user's original and create clearly named alternatives with a short note stating what differs.
-- In implementation mode, extend the selected native sketch, constraints, and reference geometry rather than rebuilding from a screenshot.
-- Once a concept is selected, hide rejected alternatives and leave the selected result unambiguous and editable.
+1. Identify the selected, authoritative `.FCStd` for each affected part and assembly, inspect its native tree and linked sources, and record `git status` plus any unsaved FreeCAD state. Treat pre-existing changes as user-owned. If the target or its baseline is ambiguous, resolve that before editing.
+2. Keep **one active document per part or assembly** and iterate in place, including during concept work. Extend its native sketches, constraints, and references rather than rebuilding from a screenshot. Change linked source documents only when the assembly needs them. Use `.codex-tmp/` for disposable experiments and recovery checkpoints; create a separate published concept file only when the user explicitly asks for a parallel alternative.
+3. Before the first mutation, establish a reversible checkpoint for every file the agent will change. A clean tracked file can use its Git revision; for a dirty file, preserve its exact pre-agent state under ignored `.codex-tmp/` after reconciling unsaved GUI work. Use small FreeCAD transactions and validate each edit before saving. Never use a blanket reset, stash, or restore over unrelated or intervening user work.
+4. Present the changed document as **pending review** with measured interfaces, relevant isometric and close-up/section views, native-feature validity, and explicit tradeoffs. Ask whether to accept or reject it; a technically valid concept is not automatically an accepted design. On acceptance, stage and commit only the agreed files. On rejection, roll back only the agent's changes to the recorded baseline, then reopen and verify the restored native document. If the user has edited it meanwhile, reconcile those edits before rollback. Leave undecided work uncommitted and clearly identified.
+
+Before altering layout, mating geometry, cable paths, optical openings, or structural support, distinguish fixed interfaces from design freedom and ask about consequential tradeoffs. For product-form work, inspect the whole assembly and the user's marked viewpoint; check silhouette, surface hierarchy, seam placement, and continuity at the joins, not just whether features fuse. Nominal CAD clearance or interference does not establish a PETG print fit or holding force.
 
 ## FreeCAD modeling
 
@@ -42,6 +44,8 @@ After a geometry change, verify the affected model before delivery:
 3. For parametric changes, record a central parameter's original value and a dependent measurement, change it within the intended range, and confirm the expected geometry change without rerunning an external script. Restore the original value and recompute before saving.
 4. Save, close, reload, and repeat the relevant state and geometry checks. Preserve unsaved user work before closing or reloading.
 5. Inspect an isometric view and any orthographic or section views needed to prove the visible shape; confirm the intended objects, visibility, and body tip. Screenshots complement measurements; they do not replace them.
+
+For an assembly, check the saved links and every repeated joint, including fasteners, profile crossings, diffuser/cable openings, and actual support contacts. For FEM or topology work, establish the real load path, joints, supports, material and print orientation before interpreting a result; validate the baseline solve and mesh, and label studies with assumed clip stiffness or untested fits as conditional rather than a safe-service design.
 
 ## FreeCAD MCP
 

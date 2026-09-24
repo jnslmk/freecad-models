@@ -1,22 +1,19 @@
 # Stella models
 
-The selected **simple compact PETG** assembly is
-[`StellaOctangula-Simple-Compact-PETG.FCStd`](StellaOctangula-Simple-Compact-PETG.FCStd).
-Keep these three native source documents beside it so its relative `App::Link`
-references resolve:
+The selected compact PETG assembly is [`StellaOctangula.FCStd`](StellaOctangula.FCStd).
+It links the following native source documents in this directory:
 
-- [`StellaCoreSimple-Compact-PETG.FCStd`](StellaCoreSimple-Compact-PETG.FCStd)
-- [`StellaCoreSimple-Offset-Compact-PETG.FCStd`](StellaCoreSimple-Offset-Compact-PETG.FCStd)
-- [`StellaProfileClamp-Compact-PETG.FCStd`](StellaProfileClamp-Compact-PETG.FCStd)
+- [`StellaCore.FCStd`](StellaCore.FCStd) — four base cores
+- [`StellaOffsetCore.FCStd`](StellaOffsetCore.FCStd) — four offset cores
+- [`StellaProfileClamp.FCStd`](StellaProfileClamp.FCStd) — 24 counter-clamps
 
-[`design-review/`](design-review/) retains earlier concepts, snapshots, and
-written verification notes. Make future edits to the top-level selected
-documents.
-The older `StellaOctangula.FCStd` and bolted
-`design-review/StellaOctangula-Simple.FCStd` are retained separately; neither
-is the selected compact assembly. See
-[`design-review/compact-petg-clamp-2026-09-24.md`](design-review/compact-petg-clamp-2026-09-24.md)
-for design and CAD verification details.
+The assembly also contains its profile components and 96 internal links. Keep
+these four `.FCStd` files together so the relative external links resolve.
+Earlier review files were removed from the working tree; tracked versions remain
+available in Git history.
 
-**Fabrication is not yet validated:** the Ø3.8 mm pilot, PETG insert fit,
-clamping force, screw length, and sustained load still need physical tests.
+`create_stella_octangula.py` is a legacy generator for the earlier arm-based
+assembly. It does not rebuild this selected compact model.
+
+**Fabrication is not yet validated:** PETG insert fit, clamping force, screw
+length, and sustained load still need physical tests.

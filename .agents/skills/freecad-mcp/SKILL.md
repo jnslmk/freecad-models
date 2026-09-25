@@ -75,12 +75,27 @@ running.
    expected-path validation.
 2. Make small, coherent edits through GUI-thread Python or document tools. Follow the repository's modeling contract; a persistent builder script is optional, not a prerequisite. If a scoped reusable script exists, inspect it before executing it against a live document.
 
+   For unfamiliar FreeCAD Python APIs, run a small read-only probe before a
+   multi-object inspection or edit: check the actual object's `PropertiesList`,
+   `Constraints`, or `hasattr`/`dir` instead of assuming an attribute or method
+   exists. Build `execute_code` snippets incrementally; a syntax or API error
+   aborts the call and can hide preceding inspection output. For Sketcher
+   constraint names, inspect `constraint.Name` on `sketch.Constraints`.
+
    In a live Sketcher edit, keep the sketch open and operate on its current
    in-memory geometry. For arc endpoint constraints, query
    `sketch.getPoint(geometry_index, point_position)`: with reversed arcs,
    Sketcher positions `1` and `2` need not match
    `sketch.Geometry[i].StartPoint` and `.EndPoint`. Check the actual points
    before adding coincidence or symmetry constraints.
+
+   After removing redundant sketch constraints, verify three independent
+   invariants: no conflicting or redundant constraints, the intended remaining
+   degrees of freedom (`FullyConstrained` when zero is intended), and unchanged
+   geometry. `solve() == 0` alone does not prove full constraint.
+   `autoRemoveRedundants()` may remove a different member of an equivalent
+   constraint set; inspect what it removed and add an independent positional
+   constraint if cleanup exposes rigid-body motion.
 
    To use a source face's intersection with the sketch plane as the profile,
    call `sketch.addExternal(source.Name, "FaceN", defining=True, intersection=True)`.

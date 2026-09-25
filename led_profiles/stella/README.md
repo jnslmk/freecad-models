@@ -10,9 +10,10 @@ It links the following native source documents in this directory:
 The assembly also contains its profile components and 96 internal links. Keep
 these four `.FCStd` files together so the relative external links resolve.
 
-All 24 counter-clamps are positioned on the corresponding core's M3 pilot axes.
-The offset core retains the native web, transition loft, integrated saddles, and
-blind pilot features; its old separate bosses and channel cuts are gone.
+All 24 counter-clamps are positioned on the corresponding core's M3 through-hole axes.
+Both core variants have through M3 heat-insert holes for longer screws. The
+offset core retains its native web, transition loft, and integrated saddles;
+its old separate bosses and channel cuts are gone.
 
 Earlier review files were removed from the working tree; tracked versions remain
 available in Git history.

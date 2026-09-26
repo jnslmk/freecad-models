@@ -36,12 +36,15 @@ Segments 0–5 are `T1-E1` through `T1-E6`; segments 6–11 are `T2-E1` through
 spans the whole star. The three overview segments overlap the edge segments
 and are disabled in edge presets.
 
-Presets: 1 **Android** (original effect, segment normalized to ID 0); 2 **Stella Android** (boot);
-3 **Tetra Breathe**; 4 **Rainbow Flow**; 5 **Edge Meteor**;
-6 **Edge Scanner**; 7 **Twinkle Gold**; 8 **Fireworks**; 9 **Warm Glow**;
-10 **Night Light**; 11 **Theater Rainbow**; 12 **Off**. Loading preset 1
-restores the original one-segment layout; loading 2–11 restores all 15 segments.
+Presets: 1 **Android** (original effect, segment normalized to ID 0);
+2 **Stella Android** (boot); 3 **Tetra Breathe**; 6 **Edge Scanner**;
+7 **Twinkle Gold**; 8 **Fireworks**; 9 **Warm Glow**; 10 **Night Light**;
+11 **Theater Rainbow**; 12 **Off**. IDs 4 and 5 are unused. Loading preset 1
+restores the original one-segment layout; loading 2, 3, and 6–11 restores
+all 15 segments.
 Preset 12 turns the output off without changing the current segment layout.
+Tetra Breathe uses synchronized, opposite-direction fades: tetra 1 cyan and
+tetra 2 magenta trade brightness while their 12 edge segments stay disabled.
 Presets retain WLED's transition setting. Stella Android includes a one-shot
 zero-duration switch (`tt:0`), but an orange flash has still been reported
 when loading it from the web UI.

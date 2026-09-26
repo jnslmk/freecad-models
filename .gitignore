@@ -7,3 +7,4 @@ led_profiles/stella/design-review/
 /freecad-mcp/
 .implement-review/
 .codex-tmp/
+*.stl

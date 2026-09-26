@@ -42,5 +42,12 @@ Presets: 1 **Android** (original effect, segment normalized to ID 0); 2 **Stella
 10 **Night Light**; 11 **Theater Rainbow**; 12 **Off**. Loading preset 1
 restores the original one-segment layout; loading 2–11 restores all 15 segments.
 Preset 12 turns the output off without changing the current segment layout.
+Presets retain WLED's transition setting. Stella Android includes a one-shot
+zero-duration switch (`tt:0`), but an orange flash has still been reported
+when loading it from the web UI.
+
+[`wled/current-preset.json`](wled/current-preset.json) is a standalone snapshot
+of the active scene, not a complete `/presets.json` restore file.
+
 Edge numbers follow electrical chain order, not geometric edge labels; verify
 physical edge order and direction visually.

@@ -39,10 +39,12 @@ and are disabled in edge presets.
 Presets: 1 **Android** (original effect, segment normalized to ID 0);
 2 **Stella Android** (boot); 3 **Tetra Breathe**; 6 **Edge Scanner**;
 7 **Twinkle Gold**; 8 **Fireworks**; 9 **Warm Glow**; 10 **Night Light**;
-11 **Theater Rainbow**; 12 **Off**. IDs 4 and 5 are unused. Loading preset 1
-restores the original one-segment layout; loading 2, 3, and 6–11 restores
-all 15 segments.
-Preset 12 turns the output off without changing the current segment layout.
+11 **Theater Rainbow**; 12 **Off**; 13 **Edge Relay**. IDs 4 and 5 are unused
+in the saved snapshot. Loading preset 1 restores a single-segment layout;
+loading 2, 3, 6–11, and 13 restores all 15 segments. Preset 13 disables the
+individual edges and uses Scan on the all-star segment with groups of 23 LEDs,
+so successive electrical-chain edges light as units. Preset 12 turns the
+output off without changing the current segment layout.
 Tetra Breathe uses synchronized, opposite-direction fades: tetra 1 cyan and
 tetra 2 magenta trade brightness while their 12 edge segments stay disabled.
 Presets retain WLED's transition setting. Stella Android includes a one-shot

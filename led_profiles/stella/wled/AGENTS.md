@@ -8,6 +8,10 @@ JSON files before changing the controller.
 - `cfg.json` is the controller's native `/json/cfg` snapshot.
 - `presets.json` is the controller's native `/presets.json` snapshot and can be
   uploaded directly as a complete preset-file restore.
+- `mapping.md` records the measured LED-to-vertex wiring for all 12 runs.
+
+Before changing GLED geometry or calibrating edge directions, read
+`mapping.md`; keep it and the project's embedded `stella-gled2.svg` in sync.
 
 ## Controller
 

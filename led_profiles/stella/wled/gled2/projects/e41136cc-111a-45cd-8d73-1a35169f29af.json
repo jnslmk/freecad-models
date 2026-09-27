@@ -1,0 +1,480 @@
+{
+  "name": [
+    "Stella",
+    "Stellar scan"
+  ],
+  "external_index": 10,
+  "palette_rgb_overwrite": {
+    "mode": "tint"
+  },
+  "grid_width": 2,
+  "grid_height": 2,
+  "grid_highlight": "row",
+  "artnet_config": {
+    "universe": 18,
+    "bridge": {},
+    "artnet_control_config": {
+      "active": false,
+      "universe": 1337
+    }
+  },
+  "main_dimmer": 0.35,
+  "palette": {
+    "primary": {
+      "rgb": [
+        0.4470588235294118,
+        0.8313725490196079,
+        0.8705882352941177
+      ]
+    },
+    "secondary": {
+      "rgb": [
+        0.9098039215686274,
+        0.6392156862745098,
+        0.40784313725490196
+      ]
+    },
+    "gradient": [
+      {
+        "rgb": [
+          0.32,
+          0.82,
+          0.86
+        ]
+      },
+      {
+        "rgb": [
+          0.06274509803921569,
+          0.21568627450980393,
+          0.2784313725490196
+        ]
+      },
+      {
+        "rgb": [
+          0.12549019607843137,
+          0.5176470588235295,
+          0.6039215686274509
+        ]
+      },
+      {
+        "rgb": [
+          0.4470588235294118,
+          0.8313725490196079,
+          0.8705882352941177
+        ]
+      },
+      {
+        "rgb": [
+          0.7686274509803922,
+          0.9098039215686274,
+          0.8588235294117647
+        ]
+      },
+      {
+        "rgb": [
+          0.09411764705882353,
+          0.4745098039215686,
+          0.5647058823529412
+        ]
+      },
+      {
+        "rgb": [
+          0.0784313725490196,
+          0.12941176470588237,
+          0.25882352941176473
+        ]
+      },
+      {
+        "rgb": [
+          0.3176470588235294,
+          0.15294117647058825,
+          0.34509803921568627
+        ]
+      },
+      {
+        "rgb": [
+          0.6549019607843137,
+          0.2549019607843137,
+          0.47058823529411764
+        ]
+      },
+      {
+        "rgb": [
+          0.9098039215686274,
+          0.6392156862745098,
+          0.40784313725490196
+        ]
+      },
+      {
+        "rgb": [
+          0.9450980392156862,
+          0.788235294117647,
+          0.5607843137254902
+        ]
+      },
+      {
+        "rgb": [
+          0.3215686274509804,
+          0.16862745098039217,
+          0.3137254901960784
+        ]
+      },
+      {
+        "rgb": [
+          0.050980392156862744,
+          0.09803921568627451,
+          0.20784313725490197
+        ]
+      },
+      {
+        "rgb": [
+          0.07058823529411765,
+          0.20784313725490197,
+          0.3333333333333333
+        ]
+      },
+      {
+        "rgb": [
+          0.12549019607843137,
+          0.36470588235294116,
+          0.43137254901960786
+        ]
+      },
+      {
+        "rgb": [
+          0.30980392156862746,
+          0.7058823529411765,
+          0.7607843137254902
+        ]
+      }
+    ]
+  },
+  "groups": {
+    "0": "tetra1",
+    "1": "tetra2"
+  },
+  "scenes_instances_grid": {
+    "0:0": {
+      "id": "3e7cf620-58bc-492e-9785-3a0921c337be",
+      "name": "Stellar scan \u00b7 cyan",
+      "color": "Blue",
+      "active": true,
+      "opacity": {
+        "multiplier": 1.0,
+        "curve": null,
+        "sound_trigger": null
+      },
+      "input_dimmer": 1.0,
+      "ignore_main_dimmer": false,
+      "beat_progression_offset": {
+        "multiplier": 0.0,
+        "curve": null,
+        "sound_trigger": null
+      },
+      "activation_input": null,
+      "flash_input": null,
+      "set_offset_on_flash": false,
+      "dimmer_input": null,
+      "scene_id": "3886cf7e-cd21-477c-b93a-0d8caedcd409",
+      "scene": {
+        "effects": [
+          {
+            "color_shift": {
+              "multiplier": 0.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "opacity": {
+              "multiplier": 1.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "beat_progression": {
+              "multiplier": 1.0,
+              "curve": "2e075ccb-90c4-474b-8d16-c670405499a6",
+              "sound_trigger": null
+            },
+            "beat_progression_offset": {
+              "multiplier": 0.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "speed_exponent": -2,
+            "group_index": 0,
+            "animation": "ad350ae9-9565-4433-b804-adee55e9064d",
+            "animation_config": {
+              "u32_0": 1,
+              "u32_1": 0,
+              "u32_2": 0,
+              "float_0": {
+                "Percentage": {
+                  "multiplier": 0.16,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_1": {
+                "Percentage": {
+                  "multiplier": 0.75,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_2": {
+                "Degrees": {
+                  "multiplier": 0.25,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_3": {
+                "F32": 0.0
+              },
+              "float_4": {
+                "F32": 0.0
+              },
+              "float_5": {
+                "F32": 0.0
+              }
+            }
+          }
+        ]
+      },
+      "groups_overwrite": null,
+      "palette_overwrite": null
+    },
+    "1:0": {
+      "id": "8bd8639c-d1f4-434e-9d3d-a76839af3105",
+      "name": "Stellar scan \u00b7 warm ember",
+      "color": "Orange",
+      "active": true,
+      "opacity": {
+        "multiplier": 1.0,
+        "curve": null,
+        "sound_trigger": null
+      },
+      "input_dimmer": 1.0,
+      "ignore_main_dimmer": false,
+      "beat_progression_offset": {
+        "multiplier": 0.0,
+        "curve": null,
+        "sound_trigger": null
+      },
+      "activation_input": null,
+      "flash_input": null,
+      "set_offset_on_flash": false,
+      "dimmer_input": null,
+      "scene_id": "fa1ddfe8-32ba-4e4a-9e5e-75568f6454e1",
+      "scene": {
+        "effects": [
+          {
+            "color_shift": {
+              "multiplier": 0.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "opacity": {
+              "multiplier": 1.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "beat_progression": {
+              "multiplier": 1.0,
+              "curve": "2e075ccb-90c4-474b-8d16-c670405499a6",
+              "sound_trigger": null
+            },
+            "beat_progression_offset": {
+              "multiplier": 0.0,
+              "curve": null,
+              "sound_trigger": null
+            },
+            "speed_exponent": -2,
+            "group_index": 1,
+            "animation": "ad350ae9-9565-4433-b804-adee55e9064d",
+            "animation_config": {
+              "u32_0": 1,
+              "u32_1": 0,
+              "u32_2": 0,
+              "float_0": {
+                "Percentage": {
+                  "multiplier": 0.16,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_1": {
+                "Percentage": {
+                  "multiplier": 0.75,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_2": {
+                "Degrees": {
+                  "multiplier": 0.25,
+                  "curve": null,
+                  "sound_trigger": null
+                }
+              },
+              "float_3": {
+                "F32": 0.0
+              },
+              "float_4": {
+                "F32": 0.0
+              },
+              "float_5": {
+                "F32": 0.0
+              }
+            }
+          }
+        ]
+      },
+      "groups_overwrite": null,
+      "palette_overwrite": {
+        "primary": {
+          "rgb": [
+            0.4470588235294118,
+            0.8313725490196079,
+            0.8705882352941177
+          ]
+        },
+        "secondary": {
+          "rgb": [
+            0.9098039215686274,
+            0.6392156862745098,
+            0.40784313725490196
+          ]
+        },
+        "gradient": [
+          {
+            "rgb": [
+              0.96,
+              0.44,
+              0.25
+            ]
+          },
+          {
+            "rgb": [
+              0.06274509803921569,
+              0.21568627450980393,
+              0.2784313725490196
+            ]
+          },
+          {
+            "rgb": [
+              0.12549019607843137,
+              0.5176470588235295,
+              0.6039215686274509
+            ]
+          },
+          {
+            "rgb": [
+              0.4470588235294118,
+              0.8313725490196079,
+              0.8705882352941177
+            ]
+          },
+          {
+            "rgb": [
+              0.7686274509803922,
+              0.9098039215686274,
+              0.8588235294117647
+            ]
+          },
+          {
+            "rgb": [
+              0.09411764705882353,
+              0.4745098039215686,
+              0.5647058823529412
+            ]
+          },
+          {
+            "rgb": [
+              0.0784313725490196,
+              0.12941176470588237,
+              0.25882352941176473
+            ]
+          },
+          {
+            "rgb": [
+              0.3176470588235294,
+              0.15294117647058825,
+              0.34509803921568627
+            ]
+          },
+          {
+            "rgb": [
+              0.6549019607843137,
+              0.2549019607843137,
+              0.47058823529411764
+            ]
+          },
+          {
+            "rgb": [
+              0.9098039215686274,
+              0.6392156862745098,
+              0.40784313725490196
+            ]
+          },
+          {
+            "rgb": [
+              0.9450980392156862,
+              0.788235294117647,
+              0.5607843137254902
+            ]
+          },
+          {
+            "rgb": [
+              0.3215686274509804,
+              0.16862745098039217,
+              0.3137254901960784
+            ]
+          },
+          {
+            "rgb": [
+              0.050980392156862744,
+              0.09803921568627451,
+              0.20784313725490197
+            ]
+          },
+          {
+            "rgb": [
+              0.07058823529411765,
+              0.20784313725490197,
+              0.3333333333333333
+            ]
+          },
+          {
+            "rgb": [
+              0.12549019607843137,
+              0.36470588235294116,
+              0.43137254901960786
+            ]
+          },
+          {
+            "rgb": [
+              0.30980392156862746,
+              0.7058823529411765,
+              0.7607843137254902
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "svg": {
+    "svg_contents": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"400\" viewBox=\"0 0 400 400\">\n  <title>Stella octangula \u2014 276 pixels, two interpenetrating tetrahedra</title>\n  <!-- GPIO16/T1 is upper, GPIO4/T2 is lower. Each base is level in 3D; its corners separate in this oblique projection. Electrical edge directions and corner pairings were physically calibrated. -->\n  <rect width=\"400\" height=\"400\" fill=\"#101321\"/>\n  <g fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"5\">\n    <!-- T1: upper apex A (200,22), level lower base B (60,272), C (340,272), D (200,196). -->\n    <g stroke=\"#54c8df\">\n      <path id=\"T1-E1\" d=\"M 60,272 L 200,22\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E1\"],\"universe\":2,\"start\":0,\"count\":23}</desc></path>\n      <path id=\"T1-E2\" d=\"M 200,22 L 340,272\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E2\"],\"universe\":2,\"start\":23,\"count\":23}</desc></path>\n      <path id=\"T1-E3\" d=\"M 340,272 L 60,272\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E3\"],\"universe\":2,\"start\":46,\"count\":23}</desc></path>\n      <path id=\"T1-E4\" d=\"M 60,272 L 200,196\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E4\"],\"universe\":2,\"start\":69,\"count\":23}</desc></path>\n      <path id=\"T1-E5\" d=\"M 200,196 L 340,272\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E5\"],\"universe\":2,\"start\":92,\"count\":23}</desc></path>\n      <path id=\"T1-E6\" d=\"M 200,22 L 200,196\"><desc>{\"groups\":[\"all\",\"tetra1\",\"T1-E6\"],\"universe\":2,\"start\":115,\"count\":23}</desc></path>\n    </g>\n    <!-- T2: lower apex A (200,378), level upper base B (60,128), C (340,128), D (200,204). -->\n    <g stroke=\"#f5b779\">\n      <path id=\"T2-E1\" d=\"M 200,378 L 60,128\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E1\"],\"universe\":2,\"start\":138,\"count\":23}</desc></path>\n      <path id=\"T2-E2\" d=\"M 60,128 L 200,204\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E2\"],\"universe\":2,\"start\":161,\"count\":23}</desc></path>\n      <path id=\"T2-E3\" d=\"M 200,204 L 340,128\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E3\"],\"universe\":2,\"start\":184,\"count\":23}</desc></path>\n      <path id=\"T2-E4\" d=\"M 340,128 L 200,378\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E4\"],\"universe\":2,\"start\":207,\"count\":23}</desc></path>\n      <path id=\"T2-E5\" d=\"M 200,378 L 200,204\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E5\"],\"universe\":2,\"start\":230,\"count\":23}</desc></path>\n      <path id=\"T2-E6\" d=\"M 340,128 L 60,128\"><desc>{\"groups\":[\"all\",\"tetra2\",\"T2-E6\"],\"universe\":2,\"start\":253,\"count\":23}</desc></path>\n    </g>\n  </g>\n</svg>\n"
+  },
+  "output_routings": {
+    "routings": {
+      "2": {
+        "device": "a2078bd5-a076-421b-9b35-a38fe2c1d794",
+        "universe": 2
+      },
+      "3": {
+        "device": "a2078bd5-a076-421b-9b35-a38fe2c1d794",
+        "universe": 3
+      }
+    }
+  }
+}

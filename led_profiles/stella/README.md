@@ -43,8 +43,10 @@ Presets: 1 **Android** (original effect, segment normalized to ID 0);
 in the saved snapshot. Loading preset 1 restores a single-segment layout;
 loading 2, 3, 6–11, and 13 restores all 15 segments. Preset 13 disables the
 individual edges and uses Scan on the all-star segment with groups of 23 LEDs,
-so successive electrical-chain edges light as units. Preset 12 turns the
-output off without changing the current segment layout.
+so successive electrical-chain edges light as units, alternating blue and red.
+It requires [`wled/palette0.json`](wled/palette0.json) on the controller as
+custom palette 200; upload that file before restoring `wled/presets.json`.
+Preset 12 turns the output off without changing the current segment layout.
 Tetra Breathe uses synchronized, opposite-direction fades: tetra 1 cyan and
 tetra 2 magenta trade brightness while their 12 edge segments stay disabled.
 Presets retain WLED's transition setting. Stella Android includes a one-shot
@@ -56,3 +58,41 @@ of the active scene, not a complete `/presets.json` restore file.
 
 Edge numbers follow electrical chain order, not geometric edge labels; verify
 physical edge order and direction visually.
+
+### GLED2 spatial show
+
+[`wled/stella-gled2.svg`](wled/stella-gled2.svg) projects the two tetrahedra
+into a six-pointed star: 12 paths × 23 pixels, grouped by `all`, `tetra1`,
+`tetra2`, and electrical edge. The native **Stellar scan** project is in
+[`wled/gled2/projects/`](wled/gled2/projects/) with its Art-Net device in
+[`wled/gled2/output_devices/`](wled/gled2/output_devices/). Synchronized soft
+cyan and ember bands sweep from top to bottom across the two tetrahedra at
+35% output.
+
+For GLED2 2.28.5, copy those two JSON files into the matching
+`~/.local/share/gled2/` asset directories (keep the filenames), restart GLED,
+and load **Stella / Stellar scan**. GLED needs its standard asset library for
+the built-in Stripes 2.0 animation and Linear curve. GLED starts in blackout;
+turn **Blackout** off and check that both scene tiles show green pause icons
+(click play on either inactive tile). Otherwise only one tetrahedron scans.
+The project embeds the SVG; after changing the standalone SVG, reimport it
+into the project. Output routes GLED universes 2–3 to STAR-TENT's
+Art-Net universes 2–3 (`192.168.8.243:6454`). WLED uses Multi RGB
+starting at DMX channel 1; universe 3 begins at LED 170. This setup
+does not edit saved WLED
+presets; WLED resumes its preset after the realtime stream stops.
+
+The measured LED ranges, endpoint directions, and tetrahedron corner
+pairings are recorded in [`wled/mapping.md`](wled/mapping.md). That mapping
+is embedded in the GLED project via `wled/stella-gled2.svg`.
+
+To identify the actual wiring, close GLED and run
+`python wled/calibrate_stella.py` from this directory. It streams one dim run
+at a time: **green** marks the first three LEDs and **magenta** the last three.
+On a horizontal edge, four LEDs at each sloping edge's base corner also light
+up: **blue/yellow/cyan** identify T1-E1/E2/E6 or T2-E1/E4/E5, respectively.
+Record which corner color meets each end of the horizontal edge; no camera
+orientation is required. Press Enter for the next edge.
+Press `q` to stop; no WLED preset or LED configuration is written. If
+rewired, update the SVG paths and reimport the project into GLED.
+Do not run the probe alongside a GLED stream.

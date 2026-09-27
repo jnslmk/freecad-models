@@ -1,0 +1,14 @@
+{
+  "name": [
+    "Stella",
+    "STAR-TENT Art-Net"
+  ],
+  "external_index": 1,
+  "Artnet": {
+    "ip": "192.168.8.243",
+    "universes": [
+      2,
+      3
+    ]
+  }
+}

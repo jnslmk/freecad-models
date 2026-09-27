@@ -11,7 +11,7 @@ JSON files before changing the controller.
 - `mapping.md` records the measured LED-to-vertex wiring for all 12 runs.
 
 Before changing GLED geometry or calibrating edge directions, read
-`mapping.md`; keep it and the project's embedded `stella-gled2.svg` in sync.
+`mapping.md`; keep `gled2/stella_octangula.svg` and the GLED project's embedded SVG in sync.
 
 ## Controller
 

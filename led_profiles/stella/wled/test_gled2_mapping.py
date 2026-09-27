@@ -1,6 +1,7 @@
 """Check the GLED SVG addresses and embedded project stay in sync."""
 
 import json
+import math
 import re
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -8,8 +9,8 @@ from xml.etree import ElementTree as ET
 from calibrate_stella import packets
 
 ROOT = Path(__file__).parent
-SVG = ROOT / "stella-gled2.svg"
-PROJECT = ROOT / "gled2/projects/e41136cc-111a-45cd-8d73-1a35169f29af.json"
+SVG = ROOT / "gled2/stella_octangula.svg"
+PROJECT = ROOT / "gled2/stella_octangula.json"
 
 
 def test_mapping():
@@ -55,6 +56,8 @@ def test_mapping():
         apex = (min if tetra_index == 0 else max)(vertices, key=lambda point: point[1])
         sloping = {i + 1 for i, pair in enumerate(tetra) if apex in pair}
         assert sloping == ({1, 2, 6} if tetra_index == 0 else {1, 4, 5})
+        base = {vertex for vertex in vertices if vertex != apex}
+        assert len({vertex[1] for vertex in base}) == 1  # A level physical triangle scans together.
     assert pixels == {(2 + led // 170, led % 170) for led in range(276)}
     assert set(project["output_routings"]["routings"]) == {"2", "3"}
     first, second = packets(161, 23)  # T2-E2 crosses the universe boundary.
@@ -71,6 +74,51 @@ def test_mapping():
     assert first[18 + 134 * 3:18 + 138 * 3] == bytes((0, 28, 28)) * 4
 
 
+def test_beamhouse_project():
+    scene = json.loads((ROOT / "beamhouse/stella_octangula.bhs").read_text())
+    fixtures = scene["fixtures"]
+    assert len(fixtures) == 12 and scene["patch"]["fixtures"] == fixtures
+    assert scene["definitions"]["bhs:stella-octangula-edge"]["pixels"] == 23
+    endpoints = []
+    for index, fixture in enumerate(fixtures):
+        assert fixture["id"] == index + 1
+        start = index * 23
+        first = min(23, max(0, 170 - start))
+        expected = []
+        if first:
+            expected.append({"universe": 3, "address": 3 * start + 1, "footprint": 3 * first})
+        if first < 23:
+            expected.append({"universe": 4, "address": 3 * max(0, start - 170) + 1,
+                             "footprint": 3 * (23 - first)})
+        assert fixture["addresses"] == expected
+        position = scene["overrides"][str(index + 1)]["pos"]
+        rx, ry, rz = map(math.radians, scene["overrides"][str(index + 1)]["rot"])
+        assert abs(rx) < 1e-10
+        direction = (math.cos(ry) * math.cos(rz), math.sin(rz),
+                     -math.sin(ry) * math.cos(rz))
+        endpoints.append(tuple(
+            tuple(position[axis] + sign * 0.75 * direction[axis] for axis in range(3))
+            for sign in (-1, 1)
+        ))
+
+    for edges, names, above in (
+        (endpoints[:6], (("B", "A"), ("A", "C"), ("C", "B"),
+                         ("B", "D"), ("D", "C"), ("A", "D")), True),
+        (endpoints[6:], (("A", "B"), ("B", "D"), ("D", "C"),
+                         ("C", "A"), ("A", "D"), ("C", "B")), False),
+    ):
+        vertices = {}
+        for edge, (start, end) in zip(edges, names):
+            for point, name in zip(edge, (start, end)):
+                if name in vertices:
+                    assert all(math.isclose(a, b, abs_tol=1e-9)
+                               for a, b in zip(point, vertices[name]))
+                vertices[name] = point
+            assert math.isclose(math.dist(*edge), 1.5, abs_tol=1e-9)
+        assert len({round(vertices[name][1], 9) for name in ("B", "C", "D")}) == 1
+        assert (vertices["A"][1] > vertices["B"][1]) == above
+
 if __name__ == "__main__":
     test_mapping()
+    test_beamhouse_project()
     print("GLED2 mapping: 276 distinct RGB pixels across universes 2–3")

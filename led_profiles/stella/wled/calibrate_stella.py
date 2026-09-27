@@ -20,7 +20,7 @@ ROOT = Path(__file__).parent
 
 def edges():
     ns = {"s": "http://www.w3.org/2000/svg"}
-    for path in ET.parse(ROOT / "stella-gled2.svg").findall(".//s:path", ns):
+    for path in ET.parse(ROOT / "gled2/stella_octangula.svg").findall(".//s:path", ns):
         settings = json.loads(path.find("s:desc", ns).text)
         yield path.get("id"), settings["start"], settings["count"]
 

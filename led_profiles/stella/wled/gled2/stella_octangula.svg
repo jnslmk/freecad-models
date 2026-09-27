@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
   <title>Stella octangula — 276 pixels, two interpenetrating tetrahedra</title>
-  <!-- GPIO16/T1 is upper, GPIO4/T2 is lower. Each base is level in 3D; its corners separate in this oblique projection. Electrical edge directions and corner pairings were physically calibrated. -->
+  <!-- Elevation map for a vertical scan: level base corners share Y. Their edges overlap here; electrical directions and corner pairings are physically calibrated, not inferred from the drawing. -->
   <rect width="400" height="400" fill="#101321"/>
   <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="5">
-    <!-- T1: upper apex A (200,22), level lower base B (60,272), C (340,272), D (200,196). -->
+    <!-- T1: upper apex A (200,22), level lower base B (60,272), C (340,272), D (200,272). -->
     <g stroke="#54c8df">
       <path id="T1-E1" d="M 60,272 L 200,22"><desc>{"groups":["all","tetra1","T1-E1"],"universe":2,"start":0,"count":23}</desc></path>
       <path id="T1-E2" d="M 200,22 L 340,272"><desc>{"groups":["all","tetra1","T1-E2"],"universe":2,"start":23,"count":23}</desc></path>
       <path id="T1-E3" d="M 340,272 L 60,272"><desc>{"groups":["all","tetra1","T1-E3"],"universe":2,"start":46,"count":23}</desc></path>
-      <path id="T1-E4" d="M 60,272 L 200,196"><desc>{"groups":["all","tetra1","T1-E4"],"universe":2,"start":69,"count":23}</desc></path>
-      <path id="T1-E5" d="M 200,196 L 340,272"><desc>{"groups":["all","tetra1","T1-E5"],"universe":2,"start":92,"count":23}</desc></path>
-      <path id="T1-E6" d="M 200,22 L 200,196"><desc>{"groups":["all","tetra1","T1-E6"],"universe":2,"start":115,"count":23}</desc></path>
+      <path id="T1-E4" d="M 60,272 L 200,272"><desc>{"groups":["all","tetra1","T1-E4"],"universe":2,"start":69,"count":23}</desc></path>
+      <path id="T1-E5" d="M 200,272 L 340,272"><desc>{"groups":["all","tetra1","T1-E5"],"universe":2,"start":92,"count":23}</desc></path>
+      <path id="T1-E6" d="M 200,22 L 200,272"><desc>{"groups":["all","tetra1","T1-E6"],"universe":2,"start":115,"count":23}</desc></path>
     </g>
-    <!-- T2: lower apex A (200,378), level upper base B (60,128), C (340,128), D (200,204). -->
+    <!-- T2: lower apex A (200,378), level upper base B (60,128), C (340,128), D (200,128). -->
     <g stroke="#f5b779">
       <path id="T2-E1" d="M 200,378 L 60,128"><desc>{"groups":["all","tetra2","T2-E1"],"universe":2,"start":138,"count":23}</desc></path>
-      <path id="T2-E2" d="M 60,128 L 200,204"><desc>{"groups":["all","tetra2","T2-E2"],"universe":2,"start":161,"count":23}</desc></path>
-      <path id="T2-E3" d="M 200,204 L 340,128"><desc>{"groups":["all","tetra2","T2-E3"],"universe":2,"start":184,"count":23}</desc></path>
+      <path id="T2-E2" d="M 60,128 L 200,128"><desc>{"groups":["all","tetra2","T2-E2"],"universe":2,"start":161,"count":23}</desc></path>
+      <path id="T2-E3" d="M 200,128 L 340,128"><desc>{"groups":["all","tetra2","T2-E3"],"universe":2,"start":184,"count":23}</desc></path>
       <path id="T2-E4" d="M 340,128 L 200,378"><desc>{"groups":["all","tetra2","T2-E4"],"universe":2,"start":207,"count":23}</desc></path>
-      <path id="T2-E5" d="M 200,378 L 200,204"><desc>{"groups":["all","tetra2","T2-E5"],"universe":2,"start":230,"count":23}</desc></path>
+      <path id="T2-E5" d="M 200,378 L 200,128"><desc>{"groups":["all","tetra2","T2-E5"],"universe":2,"start":230,"count":23}</desc></path>
       <path id="T2-E6" d="M 340,128 L 60,128"><desc>{"groups":["all","tetra2","T2-E6"],"universe":2,"start":253,"count":23}</desc></path>
     </g>
   </g>

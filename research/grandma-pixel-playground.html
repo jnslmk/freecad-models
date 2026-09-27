@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phaser + MAtricks playground · Stella octangula</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #101d29;
+      --panel: #172836;
+      --stage: #0a1722;
+      --line: #344a57;
+      --text: #edf3f3;
+      --muted: #a7b9c0;
+      --signal: #79e7dc;
+      --warm: #f7bd81;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: var(--ink);
+      color: var(--text);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--warm); outline-offset: 3px; }
+    header, main, footer { max-width: 1550px; margin: auto; }
+    header { padding: 38px clamp(18px, 4vw, 60px) 28px; display: flex; justify-content: space-between; align-items: end; gap: 24px; }
+    header p, h1, h2, h3 { margin: 0; }
+    h1 { font-size: clamp(2.25rem, 4vw, 4.2rem); line-height: 1.02; letter-spacing: -.055em; font-weight: 600; }
+    header p { max-width: 38ch; line-height: 1.5; color: var(--muted); }
+    header strong { color: var(--signal); font-weight: 600; }
+    main { padding: 0 clamp(18px, 4vw, 60px); display: grid; grid-template-columns: minmax(300px, 385px) minmax(0, 1fr); gap: 22px; }
+    .controls, .display { border: 1px solid var(--line); }
+    .controls { background: var(--panel); padding: 24px; align-self: start; }
+    h2 { font-size: 1.18rem; letter-spacing: -.025em; }
+    .hint { color: var(--muted); font-size: .9rem; line-height: 1.5; margin: 9px 0 22px; }
+    .controls h3 { font-size: 1rem; margin: 23px 0 6px; }
+    .controls h3:first-of-type { margin-top: 0; }
+    .presets { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0; }
+    .presets button, #add-step, .remove-step { border: 1px solid var(--line); background: var(--stage); color: var(--text); padding: 7px 11px; }
+    .presets button:hover, #add-step:hover, .remove-step:hover { border-color: var(--signal); }
+    .edge-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .edge-list label { display: flex; align-items: center; gap: 5px; padding: 5px 2px; white-space: nowrap; font-size: .85rem; }
+    .edge-list input { accent-color: var(--signal); }
+    .step { border-top: 1px solid var(--line); padding: 12px 0; }
+    .step-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .step-head strong { color: var(--warm); font-size: .87rem; }
+    .remove-step:disabled { opacity: .45; cursor: not-allowed; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .fields label, .numeric label { display: grid; gap: 5px; color: var(--muted); font-size: .83rem; }
+    input[type="number"], input[type="color"] { background: var(--stage); border: 1px solid var(--line); color: var(--text); width: 100%; min-width: 0; padding: 7px; }
+    input[type="color"] { height: 37px; padding: 3px; cursor: pointer; }
+    .numeric { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 11px 0; }
+    .parameter { border-top: 1px solid var(--line); padding: 14px 0 12px; }
+    .parameter label { display: flex; justify-content: space-between; gap: 8px; font-size: .94rem; }
+    output, .time { font-family: ui-monospace, "DejaVu Sans Mono", monospace; font-variant-numeric: tabular-nums; }
+    output { color: var(--warm); }
+    .parameter input[type="range"] { display: block; width: 100%; margin: 13px 0 3px; accent-color: var(--signal); cursor: pointer; }
+    .parameter small, .control-note { display: block; color: var(--muted); font-size: .78rem; line-height: 1.4; margin: 7px 0 12px; }
+    .display { background: var(--stage); min-width: 0; align-self: start; }
+    .display-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 19px 22px; border-bottom: 1px solid var(--line); }
+    .display-head p { margin: 0; color: var(--muted); font-size: .86rem; }
+    .preview { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(270px, .9fr); }
+    .sculpture { min-width: 0; position: relative; background: radial-gradient(ellipse at 48% 48%, #183040, #0a1722 70%); border-right: 1px solid var(--line); }
+    .sculpture canvas { display: block; width: 100%; height: 510px; }
+    .scene-caption { position: absolute; left: 20px; top: 18px; color: var(--muted); font-size: .83rem; }
+    .scene-caption strong { display: block; color: var(--text); font-size: 1rem; margin-bottom: 4px; }
+    .grid-panel { padding: 18px; min-width: 0; display: flex; flex-direction: column; }
+    .grid-panel h3 { font-size: 1rem; }
+    .grid-panel p { color: var(--muted); line-height: 1.35; font-size: .83rem; margin: 6px 0 14px; }
+    #grid { display: block; width: 100%; height: 338px; flex: 1; }
+    .grid-foot { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: .76rem; border-top: 1px solid var(--line); padding-top: 11px; }
+    .transport { border-top: 1px solid var(--line); padding: 16px 22px; display: flex; align-items: center; gap: 18px; }
+    #play { background: var(--signal); border: 0; color: var(--stage); font-weight: bold; padding: 10px 20px; min-width: 88px; }
+    #scrub { width: 100%; accent-color: var(--signal); cursor: pointer; }
+    .time { min-width: 48px; color: var(--warm); font-size: .84rem; text-align: right; }
+    .display-foot { display: flex; justify-content: space-between; gap: 10px; padding: 0 22px 18px; font-size: .81rem; color: var(--muted); }
+    .display-foot strong { color: var(--text); }
+    footer { padding: 23px clamp(18px, 4vw, 60px) 45px; color: var(--muted); font-size: .83rem; line-height: 1.5; }
+    footer a { color: var(--signal); text-underline-offset: 3px; }
+    @media (min-width: 1121px) and (min-height: 700px) {
+      .display { position: sticky; top: 16px; }
+    }
+    @media (max-width: 1120px) {
+      .preview { grid-template-columns: 1fr; }
+      .sculpture { border-right: 0; border-bottom: 1px solid var(--line); }
+      .sculpture canvas { height: 440px; }
+      #grid { height: 295px; flex: auto; }
+    }
+    @media (max-width: 730px) {
+      header { display: block; padding-top: 24px; }
+      header p { margin-top: 15px; }
+      main { grid-template-columns: 1fr; }
+      .sculpture canvas { height: min(100vw, 440px); min-height: 310px; }
+      footer { padding-bottom: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Phaser + MAtricks<br>playground<span style="color:var(--signal)">.</span></h1>
+    <p>Program moving light across the <strong>Stella octangula</strong>: select electrical edges, edit Phaser steps, then distribute phase on the selection grid.</p>
+  </header>
+  <main>
+    <section class="controls" aria-label="Effect controls">
+      <h2>Program an effect</h2>
+      <p class="hint">12 electrical edges × 23 pixels. X runs along each edge; Y follows electrical order, T1-E1…E6 then T2-E1…E6.</p>
+      <h3>1 · Select edges</h3>
+      <div class="presets" role="group" aria-label="Edge selection presets">
+        <button type="button" data-select="all">All</button><button type="button" data-select="t1">T1</button><button type="button" data-select="t2">T2</button><button type="button" data-select="none">None</button>
+      </div>
+      <div id="edges" class="edge-list" role="group" aria-label="Individual electrical edges"></div>
+      <p class="control-note"><strong id="selected">12</strong> edges selected · <strong id="selected-pixels">276</strong> pixels</p>
+      <h3>2 · Edit Phaser steps</h3>
+      <p class="control-note">Width is % of a beat; Transition is % of that step’s width spent moving from the previous step to this one. Zero-width steps are instant; at least one width must be nonzero.</p>
+      <div id="steps"></div>
+      <button id="add-step" type="button">Add step</button>
+      <div class="parameter"><label for="bpm">Speed <output for="bpm"></output></label><input id="bpm" type="range" min="20" max="240" value="96"><small>Beats per minute; the step widths set the loop length.</small></div>
+      <h3>3 · Distribute with MAtricks</h3>
+      <p class="control-note">Phase From → To is in degrees. Block N joins N consecutive positions; Group M interleaves M groups (not a Group pool). Group 0 turns grouping off. Selected Y rows close gaps before spreading.</p>
+      <div class="numeric">
+        <label for="x-from">X Phase From (°)<input id="x-from" type="number" min="-720" max="720" step="1" value="0"></label>
+        <label for="x-to">X Phase To (°)<input id="x-to" type="number" min="-720" max="720" step="1" value="0"></label>
+        <label for="x-block">X Block<input id="x-block" type="number" min="1" max="23" step="1" value="1"></label>
+        <label for="x-group">X Group<input id="x-group" type="number" min="0" max="23" step="1" value="0"></label>
+      </div>
+      <div class="numeric">
+        <label for="y-from">Y Phase From (°)<input id="y-from" type="number" min="-720" max="720" step="1" value="0"></label>
+        <label for="y-to">Y Phase To (°)<input id="y-to" type="number" min="-720" max="720" step="1" value="360"></label>
+        <label for="y-block">Y Block<input id="y-block" type="number" min="1" max="12" step="1" value="1"></label>
+        <label for="y-group">Y Group<input id="y-group" type="number" min="0" max="12" step="1" value="0"></label>
+      </div>
+      <p class="control-note">For chosen edges together: select them and set both axes’ Phase From/To to 0°. To alternate tetrahedra: All + Y Block 6 + Y Phase 0→180. Y Block 1 + Y Group 2 interleaves odd/even edges instead.</p>
+    </section>
+    <section class="display" aria-label="Live visualizer">
+      <div class="display-head"><h2>Live output</h2><p>Preview only · no DMX sent</p></div>
+      <div class="preview">
+        <div class="sculpture"><div class="scene-caption"><strong>Stella octangula</strong>Illustrative 3D projection</div><canvas id="sculpture" aria-label="Animated preview of 276 sculpture pixels"></canvas></div>
+        <div class="grid-panel">
+          <h3>Selection grid</h3>
+          <p>X = pixel position · Y = electrical edge<br>Top six rows: T1 · bottom six: T2 · dim rows are unselected</p>
+          <canvas id="grid" aria-label="12 rows of 23 animated fixture pixels"></canvas>
+          <div class="grid-foot"><span>01 ← pixel → 23</span><span>12 edges / 276 pixels</span></div>
+        </div>
+      </div>
+      <div class="transport"><button id="play" type="button" aria-label="Pause animation">Pause</button><input id="scrub" type="range" min="0" max="8" step="0.01" value="0" aria-label="Scrub animation time in seconds"><span id="time" class="time">0.00s</span></div>
+      <div class="display-foot"><span><strong id="lit">0</strong> lit pixels above 10% brightness</span><span>Selected edges only</span></div>
+    </section>
+  </main>
+  <footer>Approximate teaching preview only, not grandMA3 software; no show file or DMX output. The 12 edge directions follow the Stella <a href="../led_profiles/stella/wled/mapping.md">electrical map</a>. See the <a href="grandma-phaser-matricks.md">Phaser + MAtricks research note</a> for console behavior and limitations.</footer>
+  <script>
+    const $ = id => document.getElementById(id);
+    const state = { playing: true, time: 0, last: performance.now(), selected: Array(12).fill(true) };
+    const steps = [
+      { dim: 100, color: '#79e7dc', width: 100, transition: 0 },
+      { dim: 0, color: '#79e7dc', width: 100, transition: 0 }
+    ];
+    function stepColor(step) {
+      step.rgb = [1, 3, 5].map(index => parseInt(step.color.slice(index, index + 2), 16) * step.dim / 100);
+    }
+    steps.forEach(stepColor);
+    const phaseX = new Float64Array(23), phaseY = new Float64Array(12);
+    let cycle = 2;
+
+    function drawSteps() {
+      $('steps').innerHTML = steps.map((step, index) => `
+        <div class="step" data-index="${index}">
+          <div class="step-head"><strong>Step ${index + 1}</strong><button type="button" class="remove-step" aria-label="Remove step ${index + 1}" ${steps.length <= 2 || !steps.some(other => other !== step && other.width > 0) ? 'disabled title="Keep two steps and a nonzero width"' : ''}>Remove</button></div>
+          <div class="fields">
+            <label>Dim (%)<input data-field="dim" aria-label="Step ${index + 1} Dim (%)" type="number" min="0" max="100" step="1" value="${step.dim}"></label>
+            <label>Color<input data-field="color" aria-label="Step ${index + 1} Color" type="color" value="${step.color}"></label>
+            <label>Width (% beat)<input data-field="width" aria-label="Step ${index + 1} Width (% beat)" type="number" min="0" max="200" step="1" value="${step.width}"></label>
+            <label>Transition (%)<input data-field="transition" aria-label="Step ${index + 1} Transition (% of width)" type="number" min="0" max="100" step="1" value="${step.transition}"></label>
+          </div>
+        </div>`).join('');
+    }
+    $('steps').addEventListener('input', event => {
+      const input = event.target;
+      if (!input.dataset.field || !input.value || !input.validity.valid) return;
+      const step = steps[Number(input.closest('.step').dataset.index)];
+      if (input.dataset.field === 'width' && Number(input.value) === 0 && !steps.some(other => other !== step && other.width > 0)) {
+        input.value = step.width;
+        return;
+      }
+      step[input.dataset.field] = input.type === 'color' ? input.value : Number(input.value);
+      if (input.dataset.field === 'dim' || input.dataset.field === 'color') stepColor(step);
+      if (input.dataset.field === 'width')
+        cycle = steps.reduce((total, item) => total + item.width / 100, 0);
+      if (input.dataset.field === 'width') {
+        $('steps').querySelectorAll('.remove-step').forEach((button, index) => {
+          button.disabled = steps.length <= 2 || !steps.some((item, itemIndex) => itemIndex !== index && item.width > 0);
+          button.title = button.disabled ? 'Keep two steps and a nonzero width' : '';
+        });
+      }
+      render();
+    });
+    $('steps').addEventListener('change', event => {
+      const input = event.target;
+      if (input.dataset.field && (!input.value || !input.validity.valid))
+        input.value = steps[Number(input.closest('.step').dataset.index)][input.dataset.field];
+    });
+    $('steps').addEventListener('click', event => {
+      const button = event.target.closest('.remove-step');
+      if (!button || steps.length <= 2) return;
+      steps.splice(Number(button.closest('.step').dataset.index), 1);
+      cycle = steps.reduce((total, step) => total + step.width / 100, 0);
+      drawSteps();
+      render();
+    });
+    $('add-step').addEventListener('click', () => {
+      steps.push({ dim: 0, color: steps.at(-1).color, width: 100, transition: 0 });
+      stepColor(steps.at(-1));
+      cycle += 1;
+      drawSteps();
+      render();
+      $('steps').lastElementChild.querySelector('input').focus();
+    });
+    drawSteps();
+
+    const edgeInputs = Array.from({ length: 12 }, (_, row) => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = true;
+      input.setAttribute('aria-label', `T${row < 6 ? 1 : 2}-E${row % 6 + 1}`);
+      label.append(input, `T${row < 6 ? 1 : 2}-E${row % 6 + 1}`);
+      $('edges').append(label);
+      input.addEventListener('change', () => {
+        state.selected[row] = input.checked;
+        updatePhases();
+        render();
+      });
+      return input;
+    });
+    document.querySelectorAll('[data-select]').forEach(button => button.addEventListener('click', () => {
+      edgeInputs.forEach((input, row) => {
+        input.checked = button.dataset.select === 'all' || (button.dataset.select === 't1' && row < 6) || (button.dataset.select === 't2' && row >= 6);
+        state.selected[row] = input.checked;
+      });
+      updatePhases();
+      render();
+    }));
+    function spread(position, count, block, group, from, to) {
+      // ponytail: block neighboring positions first, then interleave the resulting blocks into groups.
+      const blocks = Math.ceil(count / block);
+      const slots = group === 0 ? blocks : Math.min(group, blocks);
+      const slot = group === 0 ? Math.floor(position / block) : Math.floor(position / block) % slots;
+      return (from + (slots > 1 ? slot / (slots - 1) * (to - from) : 0)) / 360;
+    }
+    function updatePhases() {
+      const number = id => Number($(id).dataset.last);
+      for (let col = 0; col < 23; col++)
+        phaseX[col] = spread(col, 23, number('x-block'), number('x-group'), number('x-from'), number('x-to'));
+      const selected = state.selected.reduce((total, on) => total + Number(on), 0);
+      let position = 0;
+      for (let row = 0; row < 12; row++)
+        phaseY[row] = state.selected[row] ? spread(position++, selected, number('y-block'), number('y-group'), number('y-from'), number('y-to')) : 0;
+      $('selected').textContent = selected;
+      $('selected-pixels').textContent = selected * 23;
+    }
+    document.querySelectorAll('.numeric input').forEach(input => {
+      input.dataset.last = input.value;
+      input.addEventListener('input', () => {
+        if (!input.value || !input.validity.valid) return;
+        input.dataset.last = input.value;
+        updatePhases();
+        render();
+      });
+      input.addEventListener('change', () => {
+        if (!input.value || !input.validity.valid) input.value = input.dataset.last;
+      });
+    });
+    updatePhases();
+    const bpm = $('bpm'), bpmOutput = document.querySelector('output[for="bpm"]');
+    bpm.addEventListener('input', () => { bpmOutput.value = bpm.value + ' BPM'; render(); });
+    bpmOutput.value = bpm.value + ' BPM';
+
+    // Two regular tetrahedra, viewed at an illustrative angle; edge ordering follows mapping.md.
+    const radius = 1.4, apex = 1.5, base = apex - radius * Math.SQRT2;
+    const corner = (angle, z) => ({ x: radius * Math.cos(angle), y: radius * Math.sin(angle), z });
+    const vertices = [
+      { x: 0, y: 0, z: apex },
+      corner(Math.PI / 6, base), corner(5 * Math.PI / 6, base), corner(3 * Math.PI / 2, base),
+      { x: 0, y: 0, z: -apex },
+      corner(Math.PI / 2, -base), corner(7 * Math.PI / 6, -base), corner(11 * Math.PI / 6, -base)
+    ];
+    const edges = [
+      [1, 0], [0, 2], [2, 1], [1, 3], [3, 2], [0, 3],
+      [4, 5], [5, 7], [7, 6], [6, 4], [4, 7], [6, 5]
+    ];
+    const pixels = new Uint8ClampedArray(12 * 23 * 3);
+    const canvases = [$('sculpture'), $('grid')];
+    const contexts = canvases.map(canvas => canvas.getContext('2d'));
+    function resize() {
+      canvases.forEach(canvas => {
+        const { width, height } = canvas.getBoundingClientRect();
+        const scale = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        canvas.getContext('2d').setTransform(scale, 0, 0, scale, 0, 0);
+      });
+    }
+    new ResizeObserver(resize).observe($('sculpture'));
+    new ResizeObserver(resize).observe($('grid'));
+    resize();
+
+    function setPlaying(playing) {
+      state.playing = playing;
+      state.last = performance.now();
+      $('play').textContent = playing ? 'Pause' : 'Play';
+      $('play').setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation');
+    }
+    $('play').addEventListener('click', () => setPlaying(!state.playing));
+    $('scrub').addEventListener('input', event => {
+      state.time = Number(event.target.value);
+      setPlaying(false);
+      render();
+    });
+
+    function renderPixels() {
+      let lit = 0;
+      const beat = state.time * Number(bpm.value) / 60;
+      for (let row = 0; row < 12; row++) {
+        if (!state.selected[row]) {
+          pixels.fill(0, row * 69, row * 69 + 69);
+          continue;
+        }
+        for (let col = 0; col < 23; col++) {
+          let position = ((beat + (phaseX[col] + phaseY[row]) * cycle) % cycle + cycle) % cycle;
+          let index = 0;
+          while (index < steps.length - 1 && position >= steps[index].width / 100)
+            position -= steps[index++].width / 100;
+          const step = steps[index], previous = steps[(index + steps.length - 1) % steps.length];
+          const fade = step.width / 100 * step.transition / 100;
+          const blend = fade ? Math.min(1, position / fade) : 1;
+          const i = (row * 23 + col) * 3;
+          for (let channel = 0; channel < 3; channel++)
+            pixels[i + channel] = previous.rgb[channel] * (1 - blend) + step.rgb[channel] * blend;
+          if (Math.max(pixels[i], pixels[i + 1], pixels[i + 2]) > 26) lit++;
+        }
+      }
+      $('lit').textContent = lit;
+    }
+    function paint(ctx, index, x, y, radius) {
+      const i = index * 3;
+      const brightness = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]) / 255;
+      if (brightness > .22) {
+        ctx.fillStyle = `rgba(${pixels[i]},${pixels[i + 1]},${pixels[i + 2]},.14)`;
+        ctx.beginPath(); ctx.arc(x, y, radius * 2.25, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = brightness > .04 ? `rgb(${pixels[i]},${pixels[i + 1]},${pixels[i + 2]})` : '#344755';
+      ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+    }
+    function drawSculpture() {
+      const canvas = $('sculpture'), ctx = contexts[0];
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const angle = -.65, cosine = Math.cos(angle), sine = Math.sin(angle);
+      const scale = Math.min(w * .30, h * .24);
+      const projected = vertices.map(({ x, y, z }) => ({
+        x: w * .5 + (x * cosine - y * sine) * scale,
+        y: h * .53 - (z * .97 + (x * sine + y * cosine) * .43) * scale,
+        depth: x * sine + y * cosine
+      }));
+      const order = edges.map((edge, index) => index).sort((a, b) =>
+        (projected[edges[a][0]].depth + projected[edges[a][1]].depth) -
+        (projected[edges[b][0]].depth + projected[edges[b][1]].depth));
+      for (const row of order) {
+        const [start, end] = edges[row];
+        const a = projected[start], b = projected[end];
+        ctx.globalAlpha = state.selected[row] ? 1 : .25;
+        ctx.strokeStyle = row < 6 ? '#34565f' : '#67554d';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        for (let col = 0; col < 23; col++) {
+          const fraction = col / 22;
+          paint(ctx, row * 23 + col, a.x + (b.x - a.x) * fraction, a.y + (b.y - a.y) * fraction, Math.max(2, Math.min(4.1, scale * .033)));
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    function drawGrid() {
+      const canvas = $('grid'), ctx = contexts[1];
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const left = 48, usable = Math.max(1, w - left - 9);
+      const stepX = usable / 23, stepY = h / 12;
+      ctx.font = '11px ui-monospace, monospace';
+      ctx.textBaseline = 'middle';
+      for (let row = 0; row < 12; row++) {
+        const y = (row + .5) * stepY;
+        ctx.fillStyle = !state.selected[row] ? '#536a74' : row < 6 ? '#89bec5' : '#d1ab8e';
+        ctx.fillText(`T${row < 6 ? 1 : 2}-E${row % 6 + 1}`, 0, y);
+        ctx.globalAlpha = state.selected[row] ? 1 : .25;
+        for (let col = 0; col < 23; col++)
+          paint(ctx, row * 23 + col, left + (col + .5) * stepX, y, Math.max(1.5, Math.min(3.7, stepX * .27, stepY * .18)));
+        ctx.globalAlpha = 1;
+      }
+    }
+    function render() {
+      renderPixels();
+      drawSculpture();
+      drawGrid();
+      const shown = state.playing || state.time > 8 ? state.time % 8 : state.time;
+      $('time').textContent = shown.toFixed(2) + 's';
+      $('scrub').value = shown;
+    }
+    function frame(now) {
+      if (state.playing) state.time += Math.min((now - state.last) / 1000, .1);
+      state.last = now;
+      render();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

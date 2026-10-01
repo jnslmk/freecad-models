@@ -66,24 +66,81 @@ elevation-only map of 12 paths × 23 pixels, grouped by `all`, `tetra1`,
 `tetra2`, and electrical edge. Its Y coordinates match the native CAD
 diffuser's equal-bin pixel centres in the Beamhouse preview; horizontal
 X is illustrative, not perspective or measured azimuth.
-The native **Stellar scan** project is in
-[`wled/gled2/projects/`](wled/gled2/projects/) with its Art-Net device in
-[`wled/gled2/output_devices/`](wled/gled2/output_devices/). Synchronized soft
-cyan and ember bands sweep from top to bottom across the two tetrahedra at
-35% output.
+The native **Exhibition loop** project is in
+[`wled/gled2/projects/`](wled/gled2/projects/), with its editable WGSL animation
+in [`wled/gled2/animations/`](wled/gled2/animations/). Seven individually editable
+animation tiles cycle at 35% output: **Edge build**, **Tetra breath**, **Edge chase**,
+**Stellar scan**, **Vertex echoes**, **Counterflow**, and **Aurora**. They share one
+WGSL pattern asset, with each tile selecting its own fixed pattern and twelve
+mapped edge effects. Each tile lasts 40 seconds, including a six-second smooth
+crossfade into the next; the 4 minute 40 second sequence repeats without resetting
+incoming animation phases. The original two scan tiles remain available,
+disabled during exhibition playback, in the expanded 3 × 3 grid.
 
-For GLED2 2.28.5, copy those two JSON files into the matching
-`~/.local/share/gled2/` asset directories (keep the filenames), restart GLED,
-and load **Stella / Stellar scan**. GLED needs its standard asset library for
-the built-in Stripes 2.0 animation and Linear curve. GLED starts in blackout;
-turn **Blackout** off and check that both scene tiles show green pause icons
-(click play on either inactive tile). Otherwise only one tetrahedron scans.
-The project embeds the SVG; after changing the standalone SVG, reimport it
-into the project. Output routes GLED universes 2–3 to STAR-TENT's
-Art-Net universes 2–3 (`192.168.8.243:6454`). WLED uses Multi RGB
-starting at DMX channel 1; universe 3 begins at LED 170. This setup
-does not edit saved WLED
-presets; WLED resumes its preset after the realtime stream stops.
+Run with the installed GLED2 2.28.5 and its standard asset library:
+
+```sh
+python wled/gled2/exhibition.py                 # localhost preview only
+python wled/gled2/exhibition.py --live          # exhibition output to STAR-TENT
+python wled/gled2/exhibition.py --mode chase    # inspect one animation
+python wled/gled2/exhibition.py --hold 60 --transition 8 --live
+```
+
+The stdlib runner starts GLED, restores the project, waits for all seven
+twelve-edge tiles, releases startup blackout, and supplies a local 30 Hz OSC clock.
+It cycles native tile activation and complementary scene opacities; only the
+current and incoming tiles render during a fade. GLED's native beat curves repeat
+every four beats, so the runner is required for real-time animation and cycling;
+opening the JSON alone does not run the show. `--mode chase` runs only Edge chase.
+Close GLED or press Ctrl-C in the runner to stop. No separate playlist server
+or modified GLED executable is needed. This is unattended playback, not an
+OS-level locked-down kiosk or login autostart configuration.
+
+The runner uses an isolated home and asset repository under
+`~/.local/state/stella-exhibition/`; personal GLED projects/settings are not
+overwritten. `--profile PATH` selects another isolated profile. Do not launch
+two instances on the same OSC port (default 18765), save the running clock
+into the native project, or run a second stream to the sculpture.
+`--duration SECONDS` and `--start-at SECONDS` support bounded inspections.
+The isolated copy derives each edge's shader endpoints from the embedded
+SVG at startup, preserving CAD elevation updates and electrical direction.
+Sloping chases run physically low-to-high; level base chases follow the
+recorded first-to-last direction. Separate edge groups prevent overlapping
+elevation paths from being mistaken for the same tube.
+
+The show includes the existing **Colorful → Blurple** palette in
+[`wled/gled2/palettes/`](wled/gled2/palettes/) and uses its purple/cyan colors by
+default. The runner also imports every palette from the personal GLED asset
+library into the isolated profile without overwriting existing palette edits.
+Switch colors by selecting a palette in the project's palette tree. To edit one,
+open **Assets → Palettes**, adjust **Primary color** or **Secondary color**, click
+**Save**, then reselect that palette in the project (GLED copies colors on selection).
+Leave **Overwrite Palette** unchecked for tiles that should follow the project colors.
+
+Preview output goes only to `127.0.0.1:6454`; open
+`wled/beamhouse/stella_octangula.bhs` in Beamhouse to view it.
+`--live` instead routes GLED universes 2–3 to STAR-TENT's Art-Net universes
+2–3 (`192.168.8.243:6454`). WLED uses Multi RGB starting at DMX channel 1;
+universe 3 begins at LED 170. Neither mode edits saved WLED presets or
+controller configuration; WLED resumes its preset after the realtime stream stops.
+
+The dependency-free scheduler regression can also run without GLED or a GPU:
+
+```sh
+python wled/gled2/check_exhibition.py --schedule-only
+```
+
+For a development-only GPU behavior check (requires a GLED source checkout):
+```sh
+uv run --with wgpu python wled/gled2/check_exhibition.py --gled-source /path/to/gled2
+```
+
+This executes the actual WGSL on all 276 mapped samples and checks edge
+sequencing, reciprocal fades, chase direction, connected vertex echoes, RGB
+bounds, native tile pattern selection, and scheduled RGB arithmetic. Scheduler
+checks cover all seven tile boundaries, complementary smoothstep weights, wrap,
+midfade starts, and fixed modes. These checks do not exercise GLED's native output
+mixer or physical LEDs. The playback runner itself has no Python dependencies.
 
 The measured LED ranges, endpoint directions, and tetrahedron corner
 pairings are recorded in [`wled/mapping.md`](wled/mapping.md). That mapping

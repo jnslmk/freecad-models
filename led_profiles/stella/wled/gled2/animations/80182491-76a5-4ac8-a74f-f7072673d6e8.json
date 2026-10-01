@@ -1,0 +1,42 @@
+{
+  "name": [
+    "Stella octangula",
+    "Exhibition patterns"
+  ],
+  "shader_code": "// Time is monotonic OSC seconds, not GLED's repeating four-beat progression.\n// Each native tile selects one pattern; the OSC runner crossfades scene opacities.\nconst STELLA_TAU: f32 = 6.28318530718;\n\nfn soft_band(distance: f32, core: f32, width: f32) -> f32 {\n    return 1.0 - smoothstep(core, width, abs(distance));\n}\n\nfn exhibition_pattern(kind: u32, edge_index: u32, local: f32,\n                      rising: f32, height: f32, seconds: f32) -> vec3<f32> {\n    let cyan = primary_color();\n    let ember = secondary_color();\n    let downward = edge_index >= 6u;\n    let edge_in_tetra = edge_index % 6u;\n    let tetra_color = select(cyan, ember, downward);\n\n    switch kind {\n        case 1u: {\n            // Build twelve complete edges, hold the structure, then dissolve in order.\n            let phase = seconds % 32.0;\n            let order = f32(edge_index) * 1.1;\n            let build = smoothstep(order, order + 0.8, phase);\n            let dissolve = 1.0 - smoothstep(17.0 + order, 17.8 + order, phase);\n            return tetra_color * (0.88 * build * dissolve);\n        }\n        case 2u: {\n            // Reciprocal whole-tetra breathing: their summed brightness stays steady.\n            let breath = 0.5 + 0.5 * sin(STELLA_TAU * seconds / 14.0);\n            let level = select(breath, 1.0 - breath, downward);\n            return tetra_color * (0.04 + 0.78 * level);\n        }\n        case 3u: {\n            // All twelve heads share one fraction. Slopes travel physically low to high;\n            // level bases retain their measured first-to-last electrical direction.\n            let head = fract(seconds / 7.5) * 1.4 - 0.2;\n            let chase = soft_band(rising - head, 0.045, 0.16);\n            return tetra_color * (0.025 + 0.85 * chase);\n        }\n        case 4u: {\n            // Opposing soft bands use actual sampled height, never projected edge order.\n            let scan = 0.5 + 0.68 * sin(STELLA_TAU * seconds / 19.0);\n            let cool = soft_band(height - scan, 0.035, 0.19);\n            let warm = soft_band(height - (1.0 - scan), 0.025, 0.16);\n            return cyan * (0.015 + 0.64 * cool) + ember * (0.015 + 0.54 * warm);\n        }\n        case 5u: {\n            // mapping.md: T1 slopes E1(base->apex), E2/E6(apex->base);\n            // T2 slopes E1/E5(apex->base), E4(base->apex).\n            // All other edges join base corners reached by those slopes. Each base\n            // receives a front at BOTH connected ends, and they meet in its middle.\n            var apex_distance = 1.0 + min(local, 1.0 - local);\n            switch edge_index {\n                case 0u, 9u: { apex_distance = 1.0 - local; }\n                case 1u, 5u, 6u, 10u: { apex_distance = local; }\n                default: {}\n            }\n            // Equal physical run lengths define graph distance; SVG X is illustrative.\n            let front = fract(seconds / 10.0) * 3.0 - 0.5;\n            let wave = soft_band(apex_distance - front, 0.035, 0.17);\n            let echo = soft_band(apex_distance - (front - 0.4), 0.025, 0.2);\n            let echo_color = select(ember, cyan, downward);\n            return tetra_color * (0.018 + 0.72 * wave) + echo_color * (0.26 * echo);\n        }\n        case 6u: {\n            // T1 comets rise and T2 comets descend; base runs oppose electrically.\n            // Staggered edge phases and long trailing tails distinguish this from chase.\n            let travel = select(rising, 1.0 - rising, downward);\n            let phase = fract(seconds / 9.0 - f32(edge_in_tetra) * 0.09);\n            let head = phase * 2.1 - 0.35;\n            let tail = exp(-max(head - travel, 0.0) / 0.2)\n                     * (1.0 - smoothstep(0.0, 0.075, travel - head));\n            let envelope = smoothstep(-0.35, -0.05, head)\n                         * (1.0 - smoothstep(1.3, 1.75, head));\n            return tetra_color * (0.02 + 0.83 * tail * envelope);\n        }\n        default: {\n            // Quiet aurora: slow height-following color field with low edge contrast.\n            let field = 0.5 + 0.5 * sin(STELLA_TAU * (height * 0.6 - seconds / 85.0)\n                                    + f32(edge_index) * 0.24);\n            let glow = 0.21 + 0.045 * sin(STELLA_TAU * seconds / 61.0\n                                      + height * 2.0 + f32(edge_index) * 0.17);\n            return mix(cyan, ember, 0.28 + 0.38 * field) * glow;\n        }\n    }\n}\n\nfn animation(coord: vec2<f32>, beat_progression: f32) -> vec3<f32> {\n    let edge_index = min(uniforms.u32_0, 11u);\n    // GLED shader coords are y-up: endpoints are (SVG x/400, 1 - SVG y/400).\n    let start = vec2<f32>(uniforms.f32_0, uniforms.f32_1);\n    let end = vec2<f32>(uniforms.f32_2, uniforms.f32_3);\n    let axis = end - start;\n    // Clamp texture-sampling boundary drift; guard even a coincident endpoint pair.\n    let local = clamp(dot(coord - start, axis) / max(dot(axis, axis), 0.00000001), 0.0, 1.0);\n    var rising = local;\n    if abs(axis.y) > 0.00001 && axis.y < 0.0 {\n        rising = 1.0 - local;\n    }\n    // Actual sampled SVG extrema are y=22..378, not ideal connector vertices.\n    let height = clamp((coord.y - 0.055) / 0.89, 0.0, 1.0);\n    let seconds = max(uniforms.f32_4, 0.0);\n    let selected_mode = min(uniforms.u32_1, 6u) + 1u;\n    return clamp(exhibition_pattern(selected_mode, edge_index, local, rising, height, seconds),\n                 vec3<f32>(0.0), vec3<f32>(1.0));\n}\n",
+  "arguments": [
+    {
+      "name": "Edge",
+      "kind": {
+        "Slider": {
+          "min": 0,
+          "max": 11
+        }
+      }
+    },
+    {
+      "name": "Mode",
+      "kind": {
+        "Selection": {
+          "variants": [
+            "Edge build",
+            "Tetra breath",
+            "Edge chase",
+            "Stellar scan",
+            "Vertex echoes",
+            "Counterflow",
+            "Aurora"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Start",
+      "kind": "Center"
+    },
+    {
+      "name": "End",
+      "kind": "Center"
+    }
+  ]
+}

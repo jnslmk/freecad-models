@@ -150,6 +150,9 @@ def prepare(profile, installed, args):
         device_path = data / "output_devices/a2078bd5-a076-421b-9b35-a38fe2c1d794.json"
         device = json.loads(device_path.read_text())
         device["Artnet"]["ip"] = "127.0.0.1"
+        # BeamHouse listens on 6455 by default (gled2 owns 6454); keep the
+        # preview stream addressed at the visualiser, not gled2's own input.
+        device["Artnet"]["port"] = 6455
         device_path.write_text(json.dumps(device, indent=2) + "\n")
     (data / "projects").mkdir(exist_ok=True)
     (data / "projects" / f"{PROJECT_ID}.json").write_text(json.dumps(project, indent=2) + "\n")

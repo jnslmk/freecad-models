@@ -3,6 +3,7 @@
 import json
 import math
 import re
+import struct
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -23,18 +24,24 @@ def test_mapping():
     tetra_edges = [[], []]
     pixels = set()
     endpoints = []
+    provenance = json.loads((ROOT / "beamhouse/mesh_provenance.json").read_text())
     lower_end_first = {0: True, 1: False, 5: False, 6: True, 9: False, 10: True}
     for edge, path in enumerate(paths):
         settings = json.loads(path.find("s:desc", ns).text)
         assert path.get("id") == f"T{edge // 6 + 1}-E{edge % 6 + 1}"
         assert settings["start"] == edge * 23 and settings["count"] == 23
         assert {"all", f"tetra{edge // 6 + 1}", path.get("id")} <= set(settings["groups"])
-        coords = tuple(map(int, re.findall(r"\d+", path.get("d"))))
+        coords = tuple(map(float, re.findall(r"-?\d+(?:\.\d+)?", path.get("d"))))
         assert len(coords) == 4
-        endpoints.append(coords)
+        run = provenance["runs"][edge]
+        # Connectivity belongs to connector vertices, not inset diffuser samples.
+        corners = (coords[0], -run["firstRoomMm"][1], coords[2], -run["lastRoomMm"][1])
+        endpoints.append(corners)
+        if edge not in lower_end_first:
+            assert math.isclose(coords[1], coords[3], abs_tol=1e-7)
         if edge in lower_end_first:
             assert (coords[1] > coords[3]) == lower_end_first[edge]
-        tetra_edges[edge // 6].append(frozenset((coords[:2], coords[2:])))
+        tetra_edges[edge // 6].append(frozenset((corners[:2], corners[2:])))
         pixels.update((settings["universe"] + led // 170, led % 170)
                       for led in range(settings["start"], settings["start"] + settings["count"]))
     assert endpoints[2][:2] == endpoints[1][2:]  # T1-E3 green meets E2.
@@ -78,8 +85,11 @@ def test_beamhouse_project():
     scene = json.loads((ROOT / "beamhouse/stella_octangula.bhs").read_text())
     fixtures = scene["fixtures"]
     assert len(fixtures) == 12 and scene["patch"]["fixtures"] == fixtures
-    assert scene["definitions"]["bhs:stella-octangula-edge"]["pixels"] == 23
+    provenance = json.loads((ROOT / "beamhouse/mesh_provenance.json").read_text())
     endpoints = []
+    owned = []
+    paths = ET.parse(SVG).getroot().findall(".//{http://www.w3.org/2000/svg}path")
+    minimum, maximum = provenance["gledElevation"]["sampleRangeMm"]
     for index, fixture in enumerate(fixtures):
         assert fixture["id"] == index + 1
         start = index * 23
@@ -91,15 +101,61 @@ def test_beamhouse_project():
             expected.append({"universe": 4, "address": 3 * max(0, start - 170) + 1,
                              "footprint": 3 * (23 - first)})
         assert fixture["addresses"] == expected
+        definition = scene["definitions"][fixture["definition"]]
+        assert definition["pixels"] == 23 and definition["channelsPerPixel"] == 3
+        run = provenance["runs"][index]
+        assert run["fixture"] == fixture["id"]
+        owned.extend(component["instance"] for component in run["components"])
+        assets = scene["assets"][fixture["definition"]]
+        bounds = {}
+        for kind in ("body", "diffuser"):
+            data = (ROOT / "beamhouse" / assets[kind]).read_bytes()
+            json_length = struct.unpack_from("<I", data, 12)[0]
+            gltf = json.loads(data[20:20 + json_length])
+            positions = [gltf["accessors"][primitive["attributes"]["POSITION"]]
+                         for mesh in gltf["meshes"] for primitive in mesh["primitives"]]
+            bounds[kind] = (
+                [min(accessor["min"][axis] for accessor in positions) for axis in range(3)],
+                [max(accessor["max"][axis] for accessor in positions) for axis in range(3)],
+            )
+        assert math.isclose((bounds["diffuser"][1][0] - bounds["diffuser"][0][0]) * 1000,
+                            provenance["profileLengthMm"], abs_tol=0.01)
         position = scene["overrides"][str(index + 1)]["pos"]
         rx, ry, rz = map(math.radians, scene["overrides"][str(index + 1)]["rot"])
-        assert abs(rx) < 1e-10
-        direction = (math.cos(ry) * math.cos(rz), math.sin(rz),
-                     -math.sin(ry) * math.cos(rz))
-        endpoints.append(tuple(
-            tuple(position[axis] + sign * 0.75 * direction[axis] for axis in range(3))
-            for sign in (-1, 1)
-        ))
+
+        def rotate(point):
+            x, y, z = point
+            x, y = math.cos(rz) * x - math.sin(rz) * y, math.sin(rz) * x + math.cos(rz) * y
+            x, z = math.cos(ry) * x + math.sin(ry) * z, -math.sin(ry) * x + math.cos(ry) * z
+            y, z = math.cos(rx) * y - math.sin(rx) * z, math.sin(rx) * y + math.cos(rx) * z
+            return x, y, z
+
+        # Diffuser +X is electrical first→last, independent of owned hardware bounds.
+        direction = rotate((1, 0, 0))
+        first, last = run["firstRoomMm"], run["lastRoomMm"]
+        length = math.dist(first, last)
+        assert all(math.isclose(direction[axis], (last[axis] - first[axis]) / length,
+                                abs_tol=1e-9) for axis in range(3))
+        center = [(min(bounds[k][0][a] for k in bounds) +
+                   max(bounds[k][1][a] for k in bounds)) / 2 for a in range(3)]
+        # Loader converts Z-up→Y-up, then jointly centers both assets.
+        restored = rotate((center[0], -center[2], center[1]))
+        assert all(math.isclose(a, b, abs_tol=1e-6) for a, b in zip(position, restored))
+        coords = tuple(map(float, re.findall(r"-?\d+(?:\.\d+)?", paths[index].get("d"))))
+        lower, upper = bounds["diffuser"]
+        for pixel in range(23):
+            t = (pixel + 0.5) / 23
+            local = (lower[0] + t * (upper[0] - lower[0]) - center[0],
+                     -((lower[2] + upper[2]) / 2 - center[2]),
+                     (lower[1] + upper[1]) / 2 - center[1])
+            height = (position[1] + rotate(local)[1]) * 1000
+            # GLED samples SVG endpoint-inclusive i/22, matching diffuser bin centres.
+            svg_y = coords[1] + (coords[3] - coords[1]) * pixel / 22
+            mapped_height = maximum - (svg_y - 22) * (maximum - minimum) / 356
+            assert math.isclose(height, mapped_height, abs_tol=0.001)
+        endpoints.append((tuple(first), tuple(last)))
+
+    assert len(owned) == len(set(owned)) == sum(provenance["componentCounts"].values())
 
     for edges, names, above in (
         (endpoints[:6], (("B", "A"), ("A", "C"), ("C", "B"),
@@ -114,7 +170,7 @@ def test_beamhouse_project():
                     assert all(math.isclose(a, b, abs_tol=1e-9)
                                for a, b in zip(point, vertices[name]))
                 vertices[name] = point
-            assert math.isclose(math.dist(*edge), 1.5, abs_tol=1e-9)
+            assert math.dist(*edge) > provenance["profileLengthMm"]
         assert len({round(vertices[name][1], 9) for name in ("B", "C", "D")}) == 1
         assert (vertices["A"][1] > vertices["B"][1]) == above
 

@@ -1,0 +1,1425 @@
+{
+  "sourceSha256": {
+    "StellaProfileClamp.FCStd": "af5b79b760796089c7e50cdf05aee996290c1af41e74bdf6ac2a9ce250009502",
+    "StellaOctangula.FCStd": "54c01b91123fe567047d12a721ebd9e15d6deae424e6a3d184305820328aa1b0",
+    "StellaOffsetCore.FCStd": "da584bcb2fb07ed327614f831332d37762875c8c9bead8fee1ffaaa2001e3338",
+    "StellaCore.FCStd": "935784f203cde83117d22e3e761338e5b27ea4f90d086a903c0219379ad382de"
+  },
+  "cadToRoomRotation": [
+    [
+      0.7071067811865475,
+      -0.7071067811865475,
+      0
+    ],
+    [
+      0.5773502691896258,
+      0.5773502691896258,
+      0.5773502691896258
+    ],
+    [
+      -0.4082482904638631,
+      -0.4082482904638631,
+      0.8164965809277261
+    ]
+  ],
+  "tessellationDeflectionMm": 0.2,
+  "runs": [
+    {
+      "fixture": 1,
+      "definition": "bhs:stella-T1-E1",
+      "cadEdge": "base:0",
+      "firstVertex": 1,
+      "lastVertex": 0,
+      "firstRoomMm": [
+        801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "lastRoomMm": [
+        0.0,
+        981.8356759311098,
+        0.0
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_0_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_0_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_0_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_0_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_base_0",
+          "source": "StellaCore.OrganicTriangleBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_base_1",
+          "source": "StellaCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E1-body.glb",
+          "sha256": "1d837f2307eda259e04975aed0e2f6ec9da95852b0c9fa790b1fd29ede5f73dd"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E1-diffuser.glb",
+          "sha256": "4b3590e87e5e075f1f235d72dd2c1951f06cfd2a3c4c55b75e774cdbf0e7df64"
+        }
+      }
+    },
+    {
+      "fixture": 2,
+      "definition": "bhs:stella-T1-E2",
+      "cadEdge": "base:1",
+      "firstVertex": 0,
+      "lastVertex": 2,
+      "firstRoomMm": [
+        0.0,
+        981.8356759311098,
+        0.0
+      ],
+      "lastRoomMm": [
+        -801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_1_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_1_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_1_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_1_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_base_2",
+          "source": "StellaCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E2-body.glb",
+          "sha256": "59f7eac2d324f7b5b21c55cc09cd04c65f608b9c095ae1810ad2574e29112637"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E2-diffuser.glb",
+          "sha256": "38ea9b3429375f92188a02eaa6e388ba72828a07138774e9049798b2d856fe9f"
+        }
+      }
+    },
+    {
+      "fixture": 3,
+      "definition": "bhs:stella-T1-E3",
+      "cadEdge": "base:3",
+      "firstVertex": 2,
+      "lastVertex": 1,
+      "firstRoomMm": [
+        -801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "lastRoomMm": [
+        801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_3_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_3_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_3_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_3_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E3-body.glb",
+          "sha256": "2e4fc5ea514e52db5428c1ede011db0792a1157e73391a175cc02c323ea258fa"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E3-diffuser.glb",
+          "sha256": "1b1db16509117cf395e6ed27edffc123eb3bad98634e7fede51d5777fca1d029"
+        }
+      }
+    },
+    {
+      "fixture": 4,
+      "definition": "bhs:stella-T1-E4",
+      "cadEdge": "base:4",
+      "firstVertex": 1,
+      "lastVertex": 3,
+      "firstRoomMm": [
+        801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "lastRoomMm": [
+        0.0,
+        -327.27855864370326,
+        925.6835526156871
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_4_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_4_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_4_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_4_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_base_3",
+          "source": "StellaCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E4-body.glb",
+          "sha256": "e2eb755e2b73d156a8641c06d3a89f98ac091f9050f5bc71c7671dba077260cb"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E4-diffuser.glb",
+          "sha256": "abe5212e7d8033e2fc2f4d14c0a3c68cab32ca32f70839d1499eba3cba096259"
+        }
+      }
+    },
+    {
+      "fixture": 5,
+      "definition": "bhs:stella-T1-E5",
+      "cadEdge": "base:5",
+      "firstVertex": 3,
+      "lastVertex": 2,
+      "firstRoomMm": [
+        0.0,
+        -327.27855864370326,
+        925.6835526156871
+      ],
+      "lastRoomMm": [
+        -801.6654724306138,
+        -327.27855864370326,
+        -462.84177630784353
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_5_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_5_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_5_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_5_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E5-body.glb",
+          "sha256": "4c339933aa96c5a88b496bede9d7c4dc0b7dd695f040b640d258d1943c649b1a"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E5-diffuser.glb",
+          "sha256": "f5923c55a99523a60dfbfffa32fb51581d9c431db8305b7763e2ec32688c7d7c"
+        }
+      }
+    },
+    {
+      "fixture": 6,
+      "definition": "bhs:stella-T1-E6",
+      "cadEdge": "base:2",
+      "firstVertex": 0,
+      "lastVertex": 3,
+      "firstRoomMm": [
+        0.0,
+        981.8356759311098,
+        0.0
+      ],
+      "lastRoomMm": [
+        0.0,
+        -327.27855864370326,
+        925.6835526156871
+      ],
+      "components": [
+        {
+          "instance": "Lamp_base_2_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_base_2_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_2_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_base_2_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T1-E6-body.glb",
+          "sha256": "3a8634c7b9fd2feefeade586a7bdbd9424e43f17226c5ea238cf1655a899144d"
+        },
+        "diffuser": {
+          "path": "meshes/T1-E6-diffuser.glb",
+          "sha256": "348cc0d5b2b6ba75bacff491184559120485e2ac12e7a6cd69c8f2bc49ea50b0"
+        }
+      }
+    },
+    {
+      "fixture": 7,
+      "definition": "bhs:stella-T2-E1",
+      "cadEdge": "offset:0",
+      "firstVertex": 1,
+      "lastVertex": 0,
+      "firstRoomMm": [
+        0.0,
+        -999.5891967086908,
+        0.0
+      ],
+      "lastRoomMm": [
+        -816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_0_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_0_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_0_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_0_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_offset_0",
+          "source": "StellaOffsetCore.OrganicTriangleBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_offset_1",
+          "source": "StellaOffsetCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E1-body.glb",
+          "sha256": "6800e4b4a3557a56c4a181fc62414076e49711ea749422291f617a3cb74bbeb9"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E1-diffuser.glb",
+          "sha256": "a2d4573fad45a839de458648b4f58992cf94eedf6693bc65f4d78e424815ca70"
+        }
+      }
+    },
+    {
+      "fixture": 8,
+      "definition": "bhs:stella-T2-E2",
+      "cadEdge": "offset:1",
+      "firstVertex": 0,
+      "lastVertex": 2,
+      "firstRoomMm": [
+        -816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "lastRoomMm": [
+        0.0,
+        333.19639890289693,
+        -942.4217325247055
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_1_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_1_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_1_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_1_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_offset_2",
+          "source": "StellaOffsetCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E2-body.glb",
+          "sha256": "c23e3a92ab011241028a7f45e3b9a91faea9af94175af5e8bdca6f326e85fc77"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E2-diffuser.glb",
+          "sha256": "463eb4e2ab5e1d522a4fca14b9ff08f815c71c33fe09ca60ebb482ba2c2cba98"
+        }
+      }
+    },
+    {
+      "fixture": 9,
+      "definition": "bhs:stella-T2-E3",
+      "cadEdge": "offset:5",
+      "firstVertex": 2,
+      "lastVertex": 3,
+      "firstRoomMm": [
+        0.0,
+        333.19639890289693,
+        -942.4217325247055
+      ],
+      "lastRoomMm": [
+        816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_5_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_5_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_5_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_5_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Core_offset_3",
+          "source": "StellaOffsetCore.OrganicTriangleBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E3-body.glb",
+          "sha256": "ebe3768e2410a40926f1e44027868fb4ff4b44d9ccec7ade0d93cf74ccc0e739"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E3-diffuser.glb",
+          "sha256": "30d0a841e87d200798bf194ee32bae2b71785f301eb610297dc830551de38a5a"
+        }
+      }
+    },
+    {
+      "fixture": 10,
+      "definition": "bhs:stella-T2-E4",
+      "cadEdge": "offset:4",
+      "firstVertex": 3,
+      "lastVertex": 1,
+      "firstRoomMm": [
+        816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "lastRoomMm": [
+        0.0,
+        -999.5891967086908,
+        0.0
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_4_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_4_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_4_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_4_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E4-body.glb",
+          "sha256": "4f246ff1a3ac9e71a82877008dda530be796ef27bcc8fdbd291a8655049604fe"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E4-diffuser.glb",
+          "sha256": "85b51ed14a69a22128480da7a29b1077268a7499900de89207cbd36a046ffddd"
+        }
+      }
+    },
+    {
+      "fixture": 11,
+      "definition": "bhs:stella-T2-E5",
+      "cadEdge": "offset:3",
+      "firstVertex": 1,
+      "lastVertex": 2,
+      "firstRoomMm": [
+        0.0,
+        -999.5891967086908,
+        0.0
+      ],
+      "lastRoomMm": [
+        0.0,
+        333.19639890289693,
+        -942.4217325247055
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_3_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_3_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_3_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_3_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E5-body.glb",
+          "sha256": "ff4c64fc9ed9c8a286fcc409e96980f167cee2bffc7902d704d50203a8e7bd18"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E5-diffuser.glb",
+          "sha256": "e3c878fd5038cfc11aa8007ee27fedd1350dc4db5a5b1bede636ddd260b8b249"
+        }
+      }
+    },
+    {
+      "fixture": 12,
+      "definition": "bhs:stella-T2-E6",
+      "cadEdge": "offset:2",
+      "firstVertex": 3,
+      "lastVertex": 0,
+      "firstRoomMm": [
+        816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "lastRoomMm": [
+        -816.1611614449381,
+        333.19639890289693,
+        471.21086626235274
+      ],
+      "components": [
+        {
+          "instance": "Lamp_offset_2_Aluminium",
+          "source": "StellaOctangula.ProfileExtrusionSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_Diffuser",
+          "source": "StellaOctangula.ProfileDiffuserSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_EndcapNear",
+          "source": "StellaOctangula.EndcapNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_EndcapFar",
+          "source": "StellaOctangula.EndcapFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_GlandNear",
+          "source": "StellaOctangula.GlandNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_GlandFar",
+          "source": "StellaOctangula.GlandFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_CableNear",
+          "source": "StellaOctangula.CableNearSource",
+          "solids": 1
+        },
+        {
+          "instance": "Lamp_offset_2_CableFar",
+          "source": "StellaOctangula.CableFarSource",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_2_near",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        },
+        {
+          "instance": "Clamp_offset_2_far",
+          "source": "StellaProfileClamp.ProfileClampBody",
+          "solids": 1
+        }
+      ],
+      "assets": {
+        "body": {
+          "path": "meshes/T2-E6-body.glb",
+          "sha256": "b1a8851d2d281369164b2b785816544295331b3ee83be84536cdaeb9241df03f"
+        },
+        "diffuser": {
+          "path": "meshes/T2-E6-diffuser.glb",
+          "sha256": "500d1212016517fd10e16fe12cc978e189753456d1ece233ea643ada06d28ccd"
+        }
+      }
+    }
+  ],
+  "unmeasured": "Azimuth and correspondence of named base corners to CAD vertices are illustrative. No LED centre spacing/endpoint inset exists in CAD; 23 equal diffuser texture bins cover its 1500 mm length.",
+  "componentCounts": {
+    "profiles": 12,
+    "diffusers": 12,
+    "endcaps": 24,
+    "glands": 24,
+    "cables": 24,
+    "cores": 8,
+    "clamps": 24
+  },
+  "profileLengthMm": 1500.0,
+  "crossingOffsetMm": 30.75,
+  "gledElevation": {
+    "sampleRangeMm": [
+      -953.7267614709746,
+      935.9732369768157
+    ],
+    "svgYRange": [
+      22,
+      378
+    ],
+    "sampling": "GLED samples endpoints with i/(23-1); SVG endpoints are Beamhouse bin centres 0.5/23 and 22.5/23.",
+    "runs": [
+      {
+        "fixture": 1,
+        "materialEndsMm": [
+          -262.1467459062606,
+          962.5981254853284
+        ],
+        "pixelCentresMm": [
+          -235.52185739774782,
+          -182.27208038072223,
+          -129.02230336369652,
+          -75.77252634667092,
+          -22.52274932964532,
+          30.727027687380335,
+          83.97680470440588,
+          137.22658172143147,
+          190.47635873845715,
+          243.7261357554827,
+          296.9759127725083,
+          350.22568978953393,
+          403.4754668065595,
+          456.72524382358523,
+          509.97502084061074,
+          563.2247978576363,
+          616.4745748746618,
+          669.7243518916875,
+          722.9741289087133,
+          776.223905925739,
+          829.4736829427644,
+          882.7234599597899,
+          935.9732369768157
+        ]
+      },
+      {
+        "fixture": 2,
+        "materialEndsMm": [
+          962.5981254853284,
+          -262.1467459062606
+        ],
+        "pixelCentresMm": [
+          935.9732369768157,
+          882.7234599597899,
+          829.4736829427644,
+          776.2239059257388,
+          722.9741289087133,
+          669.7243518916875,
+          616.474574874662,
+          563.2247978576363,
+          509.97502084061074,
+          456.7252438235852,
+          403.4754668065596,
+          350.22568978953393,
+          296.97591277250837,
+          243.7261357554826,
+          190.47635873845715,
+          137.22658172143142,
+          83.97680470440599,
+          30.727027687380335,
+          -22.522749329645375,
+          -75.77252634667103,
+          -129.02230336369652,
+          -182.27208038072223,
+          -235.52185739774794
+        ]
+      },
+      {
+        "fixture": 3,
+        "materialEndsMm": [
+          -347.6560711860657,
+          -347.6560711860657
+        ],
+        "pixelCentresMm": [
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657
+        ]
+      },
+      {
+        "fixture": 4,
+        "materialEndsMm": [
+          -347.6560711860657,
+          -347.6560711860657
+        ],
+        "pixelCentresMm": [
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657
+        ]
+      },
+      {
+        "fixture": 5,
+        "materialEndsMm": [
+          -347.6560711860657,
+          -347.6560711860657
+        ],
+        "pixelCentresMm": [
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657,
+          -347.6560711860657
+        ]
+      },
+      {
+        "fixture": 6,
+        "materialEndsMm": [
+          962.5981254853284,
+          -262.1467459062606
+        ],
+        "pixelCentresMm": [
+          935.9732369768157,
+          882.7234599597899,
+          829.4736829427644,
+          776.2239059257388,
+          722.9741289087133,
+          669.7243518916875,
+          616.474574874662,
+          563.2247978576363,
+          509.97502084061074,
+          456.7252438235852,
+          403.4754668065596,
+          350.22568978953393,
+          296.97591277250837,
+          243.72613575548257,
+          190.47635873845712,
+          137.22658172143142,
+          83.97680470440599,
+          30.727027687380335,
+          -22.522749329645375,
+          -75.77252634667103,
+          -129.02230336369652,
+          -182.27208038072223,
+          -235.52185739774794
+        ]
+      },
+      {
+        "fixture": 7,
+        "materialEndsMm": [
+          -980.3516499794871,
+          244.39322141210178
+        ],
+        "pixelCentresMm": [
+          -953.7267614709743,
+          -900.4769844539488,
+          -847.2272074369231,
+          -793.9774304198977,
+          -740.727653402872,
+          -687.4778763858463,
+          -634.2280993688207,
+          -580.9783223517951,
+          -527.7285453347696,
+          -474.4787683177439,
+          -421.2289913007184,
+          -367.9792142836927,
+          -314.7294372666671,
+          -261.4796602496414,
+          -208.2298832326159,
+          -154.9801062155902,
+          -101.73032919856476,
+          -48.480552181539124,
+          4.769224835486585,
+          58.01900185251224,
+          111.26877886953773,
+          164.51855588656338,
+          217.76833290358917
+        ]
+      },
+      {
+        "fixture": 8,
+        "materialEndsMm": [
+          365.40958285331726,
+          365.40958285331726
+        ],
+        "pixelCentresMm": [
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726
+        ]
+      },
+      {
+        "fixture": 9,
+        "materialEndsMm": [
+          365.40958285331726,
+          365.40958285331726
+        ],
+        "pixelCentresMm": [
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726
+        ]
+      },
+      {
+        "fixture": 10,
+        "materialEndsMm": [
+          244.39322141210178,
+          -980.3516499794871
+        ],
+        "pixelCentresMm": [
+          217.76833290358906,
+          164.51855588656343,
+          111.26877886953773,
+          58.01900185251213,
+          4.769224835486529,
+          -48.480552181539124,
+          -101.73032919856468,
+          -154.98010621559027,
+          -208.2298832326159,
+          -261.4796602496415,
+          -314.72943726666705,
+          -367.9792142836927,
+          -421.2289913007183,
+          -474.478768317744,
+          -527.7285453347696,
+          -580.9783223517952,
+          -634.2280993688207,
+          -687.4778763858463,
+          -740.7276534028721,
+          -793.9774304198977,
+          -847.2272074369231,
+          -900.4769844539488,
+          -953.7267614709746
+        ]
+      },
+      {
+        "fixture": 11,
+        "materialEndsMm": [
+          -980.3516499794871,
+          244.39322141210178
+        ],
+        "pixelCentresMm": [
+          -953.7267614709743,
+          -900.4769844539488,
+          -847.2272074369231,
+          -793.9774304198977,
+          -740.727653402872,
+          -687.4778763858463,
+          -634.2280993688207,
+          -580.9783223517951,
+          -527.7285453347696,
+          -474.4787683177439,
+          -421.2289913007184,
+          -367.9792142836927,
+          -314.7294372666671,
+          -261.47966024964137,
+          -208.2298832326159,
+          -154.9801062155902,
+          -101.73032919856479,
+          -48.480552181539124,
+          4.769224835486585,
+          58.01900185251224,
+          111.26877886953773,
+          164.51855588656343,
+          217.76833290358917
+        ]
+      },
+      {
+        "fixture": 12,
+        "materialEndsMm": [
+          365.40958285331726,
+          365.40958285331726
+        ],
+        "pixelCentresMm": [
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726,
+          365.40958285331726
+        ]
+      }
+    ]
+  }
+}

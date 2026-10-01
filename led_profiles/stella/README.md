@@ -61,9 +61,12 @@ physical edge order and direction visually.
 
 ### GLED2 spatial show
 
-[`wled/stella-gled2.svg`](wled/stella-gled2.svg) projects the two tetrahedra
-into a six-pointed star: 12 paths × 23 pixels, grouped by `all`, `tetra1`,
-`tetra2`, and electrical edge. The native **Stellar scan** project is in
+[`wled/gled2/stella_octangula.svg`](wled/gled2/stella_octangula.svg) is an
+elevation-only map of 12 paths × 23 pixels, grouped by `all`, `tetra1`,
+`tetra2`, and electrical edge. Its Y coordinates match the native CAD
+diffuser's equal-bin pixel centres in the Beamhouse preview; horizontal
+X is illustrative, not perspective or measured azimuth.
+The native **Stellar scan** project is in
 [`wled/gled2/projects/`](wled/gled2/projects/) with its Art-Net device in
 [`wled/gled2/output_devices/`](wled/gled2/output_devices/). Synchronized soft
 cyan and ember bands sweep from top to bottom across the two tetrahedra at
@@ -84,7 +87,7 @@ presets; WLED resumes its preset after the realtime stream stops.
 
 The measured LED ranges, endpoint directions, and tetrahedron corner
 pairings are recorded in [`wled/mapping.md`](wled/mapping.md). That mapping
-is embedded in the GLED project via `wled/stella-gled2.svg`.
+is embedded in the GLED project via `wled/gled2/stella_octangula.svg`.
 
 To identify the actual wiring, close GLED and run
 `python wled/calibrate_stella.py` from this directory. It streams one dim run
@@ -96,3 +99,39 @@ orientation is required. Press Enter for the next edge.
 Press `q` to stop; no WLED preset or LED configuration is written. If
 rewired, update the SVG paths and reimport the project into GLED.
 Do not run the probe alongside a GLED stream.
+
+### Beamhouse native CAD preview
+
+Load [`wled/beamhouse/stella_octangula.bhs`](wled/beamhouse/stella_octangula.bhs)
+with its sibling `meshes/` directory intact. The body assets contain the
+selected CAD extrusion, endcaps, glands, cable stubs, integrated vertex cores
+and clamps; separate diffuser assets receive RGB along electrical first→last
++X. All 128 visible native link instances occur once. These are derived
+meshes, not changes to the authoritative CAD or WLED presets.
+
+`wled/beamhouse/export_stella.py` exports the saved assembly and its linked
+sources read-only; it does not run the legacy CAD generator, rebuild geometry,
+or save any native document. It rewrites only the derived GLBs, scene's
+asset/definition/placement fields, provenance manifest, GLED SVG elevation
+and native project's embedded SVG. Other project effects and routes remain
+unchanged. Mesh exports are staged and validated before publication;
+a failed mesh export leaves live assets intact.
+Publication is atomic per file, not across the bundle: do not load the scene
+concurrently with regeneration. With FreeCAD Python modules installed,
+regenerate and check from this directory:
+
+```sh
+PYTHONPATH=/usr/lib/freecad/lib /usr/bin/python wled/beamhouse/export_stella.py
+PYTHONPATH=/usr/lib/freecad/lib /usr/bin/python wled/beamhouse/export_stella.py --check
+PYTHONPATH=/usr/lib/freecad/lib /usr/bin/python wled/beamhouse/export_stella.py --sync-svg
+python wled/test_gled2_mapping.py
+```
+
+The module path above is this workstation's installation; adjust it elsewhere.
+The read-only check reports source hashes, component ownership, mesh integrity,
+dimensions and universe mapping. Electrical corner names, vertical alignment,
+and the unavoidable unmeasured azimuth/LED-centre choices are documented in
+[`wled/mapping.md`](wled/mapping.md). Meshes use 0.2 mm CAD tessellation
+deflection, Z-up local coordinates and metres; the exporter compensates the
+loader's shared body/diffuser centering so owning a connector cannot shift a
+profile out of its native assembly position.
